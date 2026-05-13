@@ -6,6 +6,114 @@
 - 개별 문서별 버전이 아니라, Phase 1 문서 세트의 변경 이력을 순차 기록한다.
 - 동일 날짜에 여러 문서를 수정하더라도 작업 단위가 다르면 버전을 분리할 수 있다.
 
+## [v0.11] 2026-05-13
+
+### 변경 문서: data-definition.md, changelog.md
+
+- `financial_goal`이 AI 프롬프트 입력 데이터에 포함되고 금감원 API 조회에는 사용되지 않는다는 데이터 흐름 설명 추가
+- 추천 후보 데이터가 정규화 상품 데이터 전체 필드를 포함하고 추가 필드만 별도 정의한다는 기준 보완
+- AI 추천 응답의 `product_reasons.rank` 필드 정의 추가
+- `product_reasons.rank`와 추천 후보 데이터의 `rank`를 매핑 키로 사용한다는 기준 추가
+- Phase 1 캐시 만료 기준을 기본 24시간으로 정의
+- 캐시 메타데이터 예시에 `expires_at` 추가
+
+### 변경 사유
+
+- 추천 후보 데이터와 정규화 상품 데이터 간 포함 관계를 명확히 하기 위함
+- AI 추천 응답과 추천 후보 데이터를 결합하는 기준을 명확히 하기 위함
+- 금리 및 상품 조건 변동 가능성을 고려해 캐시 만료 기준을 명시하기 위함
+- `financial_goal`의 사용 위치가 금감원 API 조회가 아닌 AI 프롬프트 컨텍스트임을 데이터 흐름 관점에서 명확히 하기 위함
+
+### 영향 범위
+
+- docs/phase1/api-spec.md
+- docs/phase1/ai-policy.md
+- Phase 1 백엔드 추천 후보 생성 로직
+- Phase 1 AI 응답 파싱 및 최종 응답 결합 로직
+- Phase 1 캐시 정책 구현
+
+## [v0.10] 2026-05-13
+
+### 변경 문서: data-definition.md, changelog.md
+
+- Phase 1 데이터 정의 문서 초안 작성
+- 사용자 입력 데이터, 상품 유형 데이터, 금융 목적 데이터 정의
+- 금융권역과 `topFinGrpNo` 매핑 기준 정리
+- 금융권역 enum과 정규화 상품 데이터의 `financial_sector` 필드 연결 기준 추가
+- 금융회사 원천 필드와 정규화 필드 매핑 기준 정의
+- 금융상품 원천 데이터와 정규화 상품 데이터 구조 정의
+- 상품 유형별 원천 필드 상세는 실제 API 호출 테스트 후 보완하도록 명시
+- 추천 후보 데이터와 AI 전달 후보 수 기본값 최대 5개 정의
+- AI 추천 응답 데이터와 파싱 실패 시 `partial_success` 처리 기준 정의
+- 오류 응답 데이터와 캐시 데이터 기준 정의
+- Phase 1 저장 제외 데이터 정리
+
+### 변경 사유
+
+- api-spec.md에서 정의한 요청/응답 필드를 데이터 관점에서 구체화하기 위함
+- 외부 금융상품 API 응답과 프론트엔드 응답 구조 간 정규화 기준을 마련하기 위함
+- 백엔드 adapter/mapper 구현 전 데이터 구조 기준을 명확히 하기 위함
+- AI 응답 실패와 추천 후보 수 기준을 구현 전 명확히 하기 위함
+
+### 영향 범위
+
+- docs/phase1/api-spec.md
+- docs/phase1/ai-policy.md
+- Phase 1 백엔드 금융상품 mapper 설계
+- Phase 1 추천 API 응답 구성
+
+## [v0.9] 2026-05-13
+
+### 변경 문서: api-spec.md, changelog.md
+
+- `financial_goal`의 역할을 금감원 API 필터링 값이 아닌 AI 프롬프트 컨텍스트 값으로 명확화
+- `financial_goal` enum 값을 `lump_sum`, `idle_funds`, `living_expenses`, `jeonse`, `emergency`로 정리
+- `financial_goal`별 우선 상품 유형 매핑 기준 추가
+- `product_type`과 `financial_goal` 조합 검증 기준 추가
+- 불일치 조합은 Phase 1에서 오류 차단하지 않고 AI 안내로 처리하는 기준 추가
+- 향후 `ai-policy.md`에 goal별 프롬프트 컨텍스트와 불일치 조합 처리 기준을 반영하도록 후속 작업 추가
+
+### 변경 사유
+
+- `financial_goal`이 실제 API 필터링 값인지, AI 설명 컨텍스트 값인지 모호했던 부분을 해소하기 위함
+- 프론트엔드 선택값과 백엔드 처리 기준을 동일하게 맞추기 위함
+- 상품 유형과 금융 목적이 맞지 않는 입력 조합에 대한 Phase 1 처리 방식을 명확히 하기 위함
+- `ai-policy.md` 작성 시 AI 응답 기준과 프롬프트 정책을 일관되게 정의하기 위함
+
+### 영향 범위
+
+- docs/phase1/data-definition.md
+- docs/phase1/ai-policy.md
+- Phase 1 백엔드 추천 API 입력 검증 및 프롬프트 구성
+- Phase 1 프론트엔드 금융 목적 선택 UI
+
+## [v0.8] 2026-05-13
+
+### 변경 문서: api-spec.md, changelog.md
+
+- `risk_preference` 필드를 Phase 1 요청값에서 제거
+- `financial_goal`을 자유 입력이 아닌 enum 값으로 명확화
+- `preferred_institutions`와 금감원 API `topFinGrpNo` 매핑 기준 추가
+- Phase 1 기본 금융권역을 은행권 중심으로 정의
+- 은행권/저축은행권 조회 시 외부 API 복수 호출 가능성과 캐시 우선 기준 추가
+- 추천 상품 응답에 금융권역 정보(`financial_sector`, `financial_sector_name`, `top_fin_grp_no`) 추가
+- 금융회사명은 금감원 API의 `kor_co_nm` 값을 매핑한다고 명시
+- 상품 유형별 외부 API 호출 구조 차이를 mapper 계층에서 정규화하는 기준 추가
+
+### 변경 사유
+
+- 실제 필터링 기준이 모호한 입력값을 제거해 MVP 구현 복잡도를 낮추기 위함
+- 프론트엔드와 백엔드가 동일한 금융 목적 enum을 사용하도록 하기 위함
+- 제1금융권/제2금융권 구분과 금융회사명 표시 기준을 API 명세에 반영하기 위함
+- Render Free 티어와 외부 API 호출량을 고려해 기본 조회 범위와 캐시 우선 원칙을 명확히 하기 위함
+
+### 영향 범위
+
+- docs/phase1/data-definition.md
+- docs/phase1/ai-policy.md
+- Phase 1 백엔드 금융상품 API adapter/mapper 설계
+- Phase 1 프론트엔드 추천 조건 입력 및 결과 표시 구현
+
 ## [v0.7] 2026-05-13
 
 ### 변경 문서: api-spec.md, changelog.md

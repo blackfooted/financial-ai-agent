@@ -102,9 +102,8 @@ sequenceDiagram
   "age": 29,
   "amount": 500000,
   "saving_period_months": 12,
-  "financial_goal": "목돈 마련",
-  "preferred_institutions": ["bank"],
-  "risk_preference": "stability"
+  "financial_goal": "lump_sum",
+  "preferred_institutions": ["bank"]
 }
 ```
 
@@ -116,9 +115,12 @@ sequenceDiagram
 | `age` | number | Y | 사용자 나이 | `29` |
 | `amount` | number | Y | 상품 유형별 기준 금액 | `500000` |
 | `saving_period_months` | number | N | 가입 또는 이용 기간 | `6`, `12`, `24`, `36` |
-| `financial_goal` | string | Y | 금융 목적 | 목돈 마련, 여유자금 예치, 생활자금, 전세자금 |
-| `preferred_institutions` | array | N | 선호 금융권 | `["bank"]`, `["savings_bank"]` |
-| `risk_preference` | string | N | 선호 기준 | `stability`, `rate`, `simplicity` |
+| `financial_goal` | string | Y | 금융 목적. 고정 선택지 enum. 금감원 API 필터링 파라미터로 사용하지 않고, AI 추천 설명의 컨텍스트와 상품 유형 매핑 힌트로 사용한다. | `lump_sum`, `idle_funds`, `living_expenses`, `jeonse`, `emergency` |
+| `preferred_institutions` | array | N | 선호 금융권역 | `["bank"]`, `["savings_bank"]`, `["all"]` |
+
+`financial_goal`은 금융감독원 금융상품통합비교공시 API의 직접 필터링 파라미터로 사용하지 않는다. 백엔드에서는 사용자 입력 조건의 의미를 해석하는 보조 값으로 사용하며, AI 추천 설명 생성 시 프롬프트 컨텍스트로 전달한다. 또한 `product_type`과 `financial_goal`의 조합이 자연스러운지 판단하는 힌트로 활용한다.
+
+Phase 1 MVP에서는 `risk_preference`를 요청 필드에서 제외한다. 안정성, 금리 우선, 조건 단순성 우선은 실제 필터링 기준을 명확히 분리하기 어렵고, 구현 복잡도 대비 효과가 낮기 때문이다. Phase 1에서는 `preferred_institutions`, `saving_period_months`, 금리 정렬 기준으로 추천 후보를 구성한다. 단, 금리 기준 정렬은 내부 처리 기준으로 유지한다.
 
 ### 6.3 상품 유형 값
 
@@ -136,21 +138,27 @@ sequenceDiagram
 | `saving` | 월 저축 가능 금액 |
 | `loan` | 필요 대출 금액 |
 
-### 6.5 선호 금융권 값
+### 6.5 `financial_goal` 값
 
-| 값 | 의미 |
-|---|---|
-| `bank` | 은행 |
-| `savings_bank` | 저축은행 |
-| `all` | 전체 |
+| 값 | 화면 표시명 | 의미 | 우선 상품 유형 |
+|---|---|---|---|
+| `lump_sum` | 목돈 마련 | 일정 기간 동안 저축해 목돈을 만들고자 하는 목적 | `saving` |
+| `idle_funds` | 여유자금 예치 | 보유 자금을 일정 기간 예치하고자 하는 목적 | `deposit` |
+| `living_expenses` | 생활자금 | 생활비 또는 일반 자금 마련 목적 | `loan` |
+| `jeonse` | 전세자금 | 전세보증금 또는 주거 관련 자금 마련 목적 | `loan` |
+| `emergency` | 비상금 | 단기 비상자금 확보 또는 보관 목적 | `saving` 또는 `deposit` |
 
-### 6.6 위험 선호도 값
+우선 상품 유형은 백엔드에서 `product_type`과 `financial_goal`의 조합을 해석하는 기준으로 활용한다. 단, Phase 1에서는 불일치 조합을 오류로 강제 차단하지 않는다. 불일치 가능성이 있는 경우 AI 프롬프트에 “입력 조건 간 불일치가 있을 수 있음”을 포함해 사용자에게 자연스럽게 안내한다.
 
-| 값 | 의미 |
-|---|---|
-| `stability` | 안정성 우선 |
-| `rate` | 금리 우선 |
-| `simplicity` | 조건 단순성 우선 |
+### 6.6 `preferred_institutions` 값과 금융권역 매핑
+
+| 값 | 화면 표시명 | 금융권역 | 제1/2금융권 구분 | `topFinGrpNo` |
+|---|---|---|---|---|
+| `bank` | 은행 | 은행권 | 제1금융권 | `020000` |
+| `savings_bank` | 저축은행 | 저축은행권 | 제2금융권 | 공식 API 상세 또는 실제 호출 테스트 후 확정 |
+| `all` | 전체 | 은행권 + 저축은행권 | 제1금융권 + 제2금융권 | `020000` + 저축은행 코드 |
+
+`topFinGrpNo`는 금융감독원 금융상품통합비교공시 API 호출 시 사용하는 금융권역 코드다. Phase 1에서는 은행권(`020000`)을 기본 조회 대상으로 한다. 저축은행 코드는 공식 API 상세 또는 실제 API 호출 테스트로 확인한 뒤 구현 단계에서 확정한다.
 
 ---
 
@@ -168,6 +176,9 @@ sequenceDiagram
     {
       "rank": 1,
       "company_name": "예시은행",
+      "financial_sector": "first_sector",
+      "financial_sector_name": "제1금융권",
+      "top_fin_grp_no": "020000",
       "product_name": "예시 적금",
       "product_type": "saving",
       "base_rate": 3.2,
@@ -220,7 +231,10 @@ sequenceDiagram
 | 필드명 | 타입 | 설명 |
 |---|---|---|
 | `rank` | number | 추천 순위 |
-| `company_name` | string | 금융회사명 |
+| `company_name` | string | 금융회사명. 금감원 API의 `kor_co_nm` 값을 매핑 |
+| `financial_sector` | string | 금융권역 구분. 예: `first_sector`, `second_sector` |
+| `financial_sector_name` | string | 화면 표시용 금융권역명. 예: 제1금융권, 제2금융권 |
+| `top_fin_grp_no` | string/null | 금감원 API 금융권역 코드 |
 | `product_name` | string | 상품명 |
 | `product_type` | string | 상품 유형 |
 | `base_rate` | number/null | 기본 금리 |
@@ -275,6 +289,9 @@ AI 실패 시에는 가능한 경우 상품 후보는 표시할 수 있도록 `p
     {
       "rank": 1,
       "company_name": "예시은행",
+      "financial_sector": "first_sector",
+      "financial_sector_name": "제1금융권",
+      "top_fin_grp_no": "020000",
       "product_name": "예시 예금",
       "product_type": "deposit",
       "base_rate": 3.1,
@@ -308,7 +325,23 @@ AI 실패 시에는 가능한 경우 상품 후보는 표시할 수 있도록 `p
 | 적금 | 월 저축 가능 금액, 가입 기간, 금리 기준으로 비교 | 월 납입 조건, 우대조건 확인 필요 |
 | 대출 | 필요 금액, 목적, 금리 범위, 상환 방식 기준으로 탐색 | 승인 가능성, 실제 한도, 개인별 금리 단정 금지 |
 
-대출 상품은 Phase 1에서 제한적 탐색 기능으로 다룬다. 대출 승인 가능성, 실제 한도, 개인별 적용 금리는 판단하거나 단정하지 않는다.
+예금과 적금은 금융권역별로 `topFinGrpNo`를 달리하여 조회한다. Phase 1에서는 은행권을 기본 대상으로 하고, 저축은행권은 선택 옵션 또는 후순위 확장 대상으로 둔다.
+
+대출 상품은 예금/적금과 API 엔드포인트 및 응답 구조가 다를 수 있으므로 Phase 1에서는 제한적 탐색 기능으로 다룬다. 대출 승인 가능성, 실제 한도, 개인별 적용 금리는 판단하거나 단정하지 않는다.
+
+### 9.1 `product_type`과 `financial_goal` 조합 기준
+
+| `product_type` | 적합한 `financial_goal` | 부적합 가능성이 있는 예시 |
+|---|---|---|
+| `saving` | `lump_sum`, `emergency` | `living_expenses`, `jeonse` |
+| `deposit` | `idle_funds`, `emergency` | `living_expenses`, `jeonse` |
+| `loan` | `living_expenses`, `jeonse` | `lump_sum`, `idle_funds` |
+
+Phase 1에서는 `product_type`과 `financial_goal` 조합이 다소 불일치하더라도 요청을 오류로 차단하지 않는다. 대신 백엔드는 AI 프롬프트에 입력 조건 간 불일치 가능성을 포함하고, AI는 사용자에게 조건을 다시 확인해 볼 수 있도록 안내한다.
+
+예를 들어 `product_type: saving`과 `financial_goal: living_expenses` 조합은 일반적으로 적금 추천 목적과 맞지 않을 수 있다. 이 경우 시스템은 추천을 중단하지 않고, 생활자금 목적이라면 대출 상품 탐색이 더 적합할 수 있다는 안내를 포함할 수 있다.
+
+강제 차단 또는 자동 상품 유형 전환은 Phase 2 이후 검토한다.
 
 ---
 
@@ -330,6 +363,12 @@ AI 실패 시에는 가능한 경우 상품 후보는 표시할 수 있도록 `p
 - Phase 1에서는 파일 캐시 또는 단순 메모리 캐시를 우선 검토한다.
 - 추천 요청 1회마다 금융 API와 OpenAI API를 무조건 반복 호출하지 않도록 한다.
 - 캐시 데이터 사용 시 응답의 `source.fetched_at`에 데이터 조회 시점을 포함한다.
+- Phase 1 기본 조회값은 `preferred_institutions: ["bank"]`로 설정해 은행권 단일 조회를 우선한다.
+- `preferred_institutions`가 `["bank"]`이면 은행권 `topFinGrpNo=020000`만 조회한다.
+- `preferred_institutions`가 `["savings_bank"]`이면 저축은행권만 조회한다. 단, 저축은행 `topFinGrpNo`는 공식 API 상세 또는 실제 호출 테스트 후 확정한다.
+- `preferred_institutions`가 `["all"]`이면 은행권과 저축은행권을 순차 조회한다.
+- `all` 조회는 최소 2회 이상의 외부 API 호출이 발생할 수 있으므로, Render Free 티어와 외부 API 호출량을 고려해 캐시 데이터를 우선 사용한다.
+- Phase 1에서는 실시간 다중 호출보다 파일 캐시 또는 단순 메모리 캐시를 우선 검토한다.
 - 캐시 정책의 상세 구현은 백엔드 구현 단계에서 확정한다.
 
 ---
@@ -375,5 +414,11 @@ AI 실패 시에는 가능한 경우 상품 후보는 표시할 수 있도록 `p
 - OpenAI 호출은 반드시 `shared/openai_client.py`를 통해 처리한다.
 - 추천 API는 mock 응답부터 구현한 뒤 실제 OpenAI 호출을 연결한다.
 - 금융감독원 API 연동 실패에 대비해 샘플 데이터 또는 캐시 데이터를 준비한다.
+- 금융감독원 API는 상품 유형과 금융권역에 따라 호출 엔드포인트 또는 파라미터가 달라질 수 있다.
+- 예금, 적금, 대출은 외부 API 호출 구조와 응답 필드가 다를 수 있으므로 백엔드 구현 시 adapter 또는 mapper 계층에서 정규화한다.
+- 프론트엔드 응답은 상품 유형별 원천 응답 차이를 그대로 노출하지 않고, `recommended_products` 공통 응답 구조로 정규화한다.
 - 프론트엔드는 `IA.md`의 상태 정의를 기준으로 로딩, 오류, 결과 없음, 부분 성공 상태를 처리한다.
+- `ai-policy.md` 작성 시 `financial_goal`별 AI 프롬프트 컨텍스트 문구를 정의한다.
+- `ai-policy.md` 작성 시 `product_type`과 `financial_goal` 조합별 추천 설명 방향을 정의한다.
+- `ai-policy.md` 작성 시 불일치 조합을 수신했을 때 AI가 사용자에게 조건 확인을 안내하는 기준을 정의한다.
 - `request_id`는 백엔드에서 생성하며, Phase 1에서는 저장 없이 응답 추적용으로 사용한다.
