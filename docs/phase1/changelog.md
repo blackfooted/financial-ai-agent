@@ -6,6 +6,85 @@
 - 개별 문서별 버전이 아니라, Phase 1 문서 세트의 변경 이력을 순차 기록한다.
 - 동일 날짜에 여러 문서를 수정하더라도 작업 단위가 다르면 버전을 분리할 수 있다.
 
+## [v0.7] 2026-05-13
+
+### 변경 문서: api-spec.md, changelog.md
+
+- Phase 1 API 명세 초안 작성
+- `POST /api/phase1/recommendations` 단일 추천 API 요청/응답 구조 정의
+- `request_id` 백엔드 생성 기준 정의
+- `amount` 필드의 상품 유형별 의미 정의
+- 추천 성공, 부분 성공, 오류 응답 구조 정의
+- `partial_success` 반환 조건 정의
+- 상품 유형별 처리 기준 정의
+- AI 응답 처리 기준과 금지 표현 기준 요약
+- 캐시 및 외부 API 호출 기준 정리
+- 환경변수 및 보안 기준 정리
+- Phase 1 제외 API 목록 정리
+
+### 변경 사유
+
+- 백엔드 구현 전 추천 API의 요청/응답 계약을 명확히 하기 위함
+- Render Free 티어와 MVP 범위를 고려해 API 구조를 단순화하기 위함
+- 프론트엔드와 백엔드가 동일한 응답 상태 기준을 사용하도록 하기 위함
+- 구현 시 혼선을 줄이기 위해 `request_id`, `amount`, `partial_success` 처리 기준을 명확히 하기 위함
+
+### 영향 범위
+
+- docs/phase1/data-definition.md
+- docs/phase1/ai-policy.md
+- Phase 1 백엔드 추천 API 구현
+- Phase 1 프론트엔드 추천 요청 및 결과 표시 구현
+
+## [v0.6] 2026-05-13
+
+### 변경 문서: IA.md, changelog.md
+
+- Phase 1 IA 초안 작성
+- 폼 입력 기반 단일 페이지 추천 화면 구조 정의
+- 추천 조건 입력 영역, 추천 실행 영역, 추천 결과 영역 정의
+- 오류/빈 결과/로딩 상태별 화면 처리 기준 정의
+- PC와 모바일 화면 배치 기준 정의
+- Phase 1 제외 화면 정리
+
+### 변경 사유
+
+- flow.md에서 정의한 사용자 흐름과 시스템 흐름을 실제 화면 구조로 구체화하기 위함
+- api-spec.md와 data-definition.md 작성 전 입력 항목과 결과 표시 구조를 확정하기 위함
+- 프론트엔드 구현 전 화면 상태와 영역별 책임을 명확히 하기 위함
+
+### 영향 범위
+
+- docs/phase1/api-spec.md
+- docs/phase1/data-definition.md
+- docs/phase1/ai-policy.md
+- Phase 1 프론트엔드 화면 구현
+- Phase 1 추천 API 요청/응답 구조
+
+## [v0.5] 2026-05-13
+
+### 변경 문서: README.md, PRD.md, changelog.md
+
+- PRD.md에서 포트폴리오 목표와 평가자 관점 내용을 제거
+- PRD.md를 실제 제품 요구사항 중심 문서로 정리
+- 루트 README.md에 프로젝트 개요, 포트폴리오 목표, 기술 스택, 문서 목록, 면책 문구 추가
+- 문서 역할을 README와 Phase 1 기획 문서로 분리
+
+### 변경 사유
+
+- PRD.md의 문서 성격을 제품 요구사항 정의서로 유지하기 위함
+- 포트폴리오 목적과 평가자 관점 내용은 README.md에서 다루는 것이 적절하기 때문
+- 이후 IA, API 명세, 데이터 정의 작성 시 제품 기능 기준이 흔들리지 않도록 하기 위함
+
+### 영향 범위
+
+- docs/phase1/PRD.md
+- docs/phase1/IA.md
+- docs/phase1/api-spec.md
+- docs/phase1/data-definition.md
+- docs/phase1/ai-policy.md
+- README.md
+
 ## [v0.3] 2026-05-13
 
 ### 변경 문서: PRD.md, scenario.md, changelog.md
