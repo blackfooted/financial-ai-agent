@@ -11,6 +11,37 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.20] 2026-05-14
+
+### 변경 문서: frontend/phase1, .gitignore, changelog.md
+
+- Phase 1 프론트엔드 기본 Next.js App Router 구조 생성
+- Node.js 20.9 이상 사전 확인 기준 추가
+- create-next-app 실패 시 수동 구성 가능한 최소 파일 기준 정의
+- Tailwind CSS 기반 단일 추천 페이지 구현
+- 추천 조건 입력 폼 추가
+- 백엔드 mock 추천 API 호출 로직 추가
+- CORS 오류 발생 시 백엔드 설정 확인 안내 추가
+- 추천 결과, 로딩, 오류, 부분 성공 상태 표시 구현
+- 추천 API 요청/응답 TypeScript 타입 정의
+- 프론트엔드 README 작성
+- `.env.example`에 `NEXT_PUBLIC_API_BASE_URL` 기준 추가
+- `.gitignore`에 프론트엔드 로컬 환경 및 빌드 산출물 제외 기준 확인
+
+### 변경 사유
+
+- 백엔드 mock 추천 API를 사용자 화면에서 호출해 end-to-end 흐름을 검증하기 위함
+- Phase 1 포트폴리오 시연을 위한 최소 프론트엔드 화면을 마련하기 위함
+- 추후 UI 고도화 전 API 요청/응답 구조와 화면 상태 처리를 먼저 확인하기 위함
+- 프론트엔드 실행 환경과 CORS 설정으로 인한 초기 오류 가능성을 줄이기 위함
+
+### 영향 범위
+
+- frontend/phase1
+- Phase 1 추천 API 호출 흐름
+- 후속 프론트엔드 UI 고도화
+- 후속 Render 배포 설정
+
 ## [v0.19] 2026-05-14
 
 ### 변경 문서: schemas.py, recommendations.py, recommendation_service.py, main.py, backend README, services/README.md, requirements.txt, changelog.md
