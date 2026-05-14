@@ -129,3 +129,28 @@ python app/services/fss_client.py
 ```
 
 이 테스트는 추천 API 기본 흐름과 별개입니다.
+
+## 상품 데이터 소스 전환
+
+기본값은 `sample`입니다.
+
+```env
+PRODUCT_DATA_SOURCE=sample
+```
+
+FSS API를 사용하려면 아래처럼 설정합니다.
+
+```env
+PRODUCT_DATA_SOURCE=fss
+FSS_API_KEY=발급받은_키
+```
+
+주의:
+
+- `PRODUCT_DATA_SOURCE=fss`일 때 `FSS_API_KEY`가 없으면 추천 API는 `FINANCIAL_API_ERROR`를 반환합니다.
+- FSS 응답은 24시간 파일 캐시를 사용합니다.
+- Render Free 티어에서는 인스턴스 재시작 시 파일 캐시가 초기화될 수 있습니다.
+- 재시작 후 첫 FSS 요청은 실시간 호출이 발생할 수 있습니다.
+- Phase 1에서는 이 한계를 허용하고, 필요 시 Phase 2 이후 Redis 등 외부 캐시 도입을 검토합니다.
+- 현재 FSS 실제 연동은 은행권 예금/적금 중심입니다.
+- 저축은행과 대출 실제 연동은 후속 작업입니다.

@@ -32,6 +32,23 @@ Phase 1 mapper는 우선 선택된 option 1개를 기준으로 `base_rate`, `max
 
 `preferred_period_months`가 있으면 해당 기간의 option을 우선 선택하고, 없거나 일치 옵션이 없으면 최고 우대금리(`intr_rate2`)가 가장 높은 option을 선택한다.
 
+## FSS 캐시 데이터 기준
+
+FSS 데이터 소스 사용 시 파일 캐시를 적용한다.
+
+| 항목 | 기준 |
+|---|---|
+| 캐시 위치 | `backend/app/data/cache/` |
+| 캐시 유효시간 | 24시간 |
+| 캐시 파일 | `fss_deposit_020000.json`, `fss_saving_020000.json` |
+| 캐시 저장 데이터 | FSS 원천 응답 + `fetched_at` |
+| API Key 저장 | 금지 |
+| Git 커밋 | 금지 |
+
+Render Free 티어에서는 인스턴스 재시작 시 파일 캐시가 초기화될 수 있다.
+재시작 후 첫 FSS 요청은 실시간 호출이 발생할 수 있으며, Phase 1에서는 이를 허용한다.
+필요 시 Phase 2 이후 Redis 등 외부 캐시 도입을 검토한다.
+
 # 금융 상품 비교 추천 AI 에이전트 데이터 정의
 
 ## 1. 문서 목적

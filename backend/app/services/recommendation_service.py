@@ -10,6 +10,8 @@ from app.schemas import (
     RecommendationSource,
     RecommendedProduct,
 )
+from app.config import PRODUCT_DATA_SOURCE
+from app.services.fss_product_service import FssProductDataError, load_fss_products
 from app.services.product_loader import load_sample_products
 from shared.openai_client import generate_recommendation_explanation
 
@@ -33,7 +35,7 @@ INSTITUTION_LABELS = {
 
 
 def create_recommendation(request: RecommendationRequest) -> RecommendationResponse:
-    loaded = load_sample_products()
+    loaded = _load_products_for_source(request)
     products = loaded["products"]
 
     candidates = _filter_by_product_type(products, request.product_type)
@@ -101,6 +103,28 @@ def create_recommendation(request: RecommendationRequest) -> RecommendationRespo
 
 def _filter_by_product_type(products: list[dict[str, Any]], product_type: str) -> list[dict[str, Any]]:
     return [product for product in products if product.get("product_type") == product_type]
+
+
+def _load_products_for_source(request: RecommendationRequest) -> dict[str, Any]:
+    if PRODUCT_DATA_SOURCE != "fss":
+        return load_sample_products()
+
+    try:
+        return load_fss_products(
+            product_type=request.product_type,
+            preferred_institutions=request.preferred_institutions,
+            preferred_period_months=request.saving_period_months,
+        )
+    except FssProductDataError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "status": "error",
+                "error_code": "FINANCIAL_API_ERROR",
+                "message": "금융상품 정보를 불러오지 못했습니다.",
+                "details": [],
+            },
+        ) from exc
 
 
 def _filter_by_preferred_institutions(

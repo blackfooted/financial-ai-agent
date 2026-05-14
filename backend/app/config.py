@@ -9,6 +9,14 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 FSS_API_KEY = os.getenv("FSS_API_KEY")
 
+ALLOWED_PRODUCT_DATA_SOURCES = {"sample", "fss"}
+_raw_product_data_source = os.getenv("PRODUCT_DATA_SOURCE", "sample").lower()
+if _raw_product_data_source not in ALLOWED_PRODUCT_DATA_SOURCES:
+    logging.warning("PRODUCT_DATA_SOURCE 값이 올바르지 않습니다. sample로 처리합니다.")
+    PRODUCT_DATA_SOURCE = "sample"
+else:
+    PRODUCT_DATA_SOURCE = _raw_product_data_source
+
 # ALLOWED_ORIGINS는 comma-separated 문자열을 리스트로 변환한다.
 _raw_allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
 ALLOWED_ORIGINS = [

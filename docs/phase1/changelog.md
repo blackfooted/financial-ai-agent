@@ -11,6 +11,41 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.30] 2026-05-14
+
+### 변경 문서: config.py, fss_product_service.py, recommendation_service.py, backend README, services README, api-spec.md, data-definition.md, changelog.md
+
+- `PRODUCT_DATA_SOURCE` 환경변수 기반 상품 데이터 소스 선택 기능 추가
+- 기본값을 `sample`로 유지하고 `fss` 선택 시 FSS API 데이터 사용 가능하도록 확장
+- FSS 데이터 조회 전용 `fss_product_service.py` 추가
+- FSS 응답 24시간 파일 캐시 구현
+- 캐시 디렉토리 자동 생성 기준 추가
+- 캐시 저장 실패 시 경고 로그 후 실시간 FSS 응답으로 요청을 계속 처리하는 기준 추가
+- Render Free 티어에서 파일 캐시가 재시작 시 초기화될 수 있다는 한계 문서화
+- 캐시 사용 여부를 `source.cache_used`에 반영
+- `source.provider`를 `sample` 또는 `fss`로 구분
+- `PRODUCT_DATA_SOURCE=fss`에서 `FSS_API_KEY`가 없거나 FSS 호출 실패 시 `FINANCIAL_API_ERROR` 반환
+- sample fallback 자동 전환은 하지 않도록 명시
+- API 명세와 데이터 정의 문서에 데이터 소스 선택 및 FSS 캐시 기준 반영
+
+### 변경 사유
+
+- 실제 FSS 데이터 기반 추천 API 전환을 안전하게 진행하기 위함
+- Render mock 배포 안정성을 유지하면서 로컬 또는 배포 환경에서 FSS 데이터 소스를 선택적으로 사용할 수 있도록 하기 위함
+- FSS API 호출량과 응답 속도 문제를 줄이기 위해 24시간 캐시를 적용하기 위함
+- Render Free 티어의 파일 캐시 한계를 문서화해 배포 후 혼선을 줄이기 위함
+
+### 영향 범위
+
+- backend/app/config.py
+- backend/app/services/fss_product_service.py
+- backend/app/services/recommendation_service.py
+- backend/app/data/cache/
+- backend/README.md
+- docs/phase1/api-spec.md
+- docs/phase1/data-definition.md
+- 후속 FSS 기반 추천 API 검증
+
 ## [v0.29] 2026-05-14
 
 ### 변경 문서: product_mapper.py, services/README.md, data-definition.md, changelog.md

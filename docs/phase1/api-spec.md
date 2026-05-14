@@ -466,3 +466,26 @@ https://finlife.fss.or.kr/finlifeapi/savingProductsSearch.json?auth=KEY&topFinGr
 금감원 API client와 mapper는 실제 연동 준비 단계로 추가하며, 추천 API 기본 흐름 전환은 별도 작업으로 진행한다.
 
 저축은행 `topFinGrpNo`가 `SAVINGS_BANK_TBD` 상태일 때는 실제 API 호출을 금지한다.
+
+---
+
+## 17. 상품 데이터 소스 선택 기준
+
+Phase 1 추천 API는 환경변수 `PRODUCT_DATA_SOURCE`로 상품 데이터 소스를 선택한다.
+
+| 값 | 설명 |
+|---|---|
+| `sample` | `sample_products.json` mock 데이터 사용 |
+| `fss` | 금융감독원 API 데이터 사용 |
+
+기본값은 `sample`이다.
+
+`PRODUCT_DATA_SOURCE=fss`일 때 `FSS_API_KEY`가 없거나 FSS API 호출이 실패하면 `FINANCIAL_API_ERROR`를 반환한다.
+
+FSS 응답은 24시간 파일 캐시를 사용한다. 캐시가 유효하면 FSS API를 재호출하지 않는다.
+
+FSS API 호출은 성공했으나 캐시 저장에 실패한 경우에는 경고 로그를 남기고 해당 요청은 방금 받은 FSS 응답으로 계속 처리한다.
+
+`source.provider`는 `sample` 또는 `fss`로 표시한다.
+`source.cache_used`는 캐시 사용 여부를 표시한다.
+`source.fetched_at`은 sample meta 시점, FSS API 호출 시점, 또는 FSS 캐시 저장 시점을 표시한다.
