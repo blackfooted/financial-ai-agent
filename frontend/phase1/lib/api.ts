@@ -19,12 +19,20 @@ function extractErrorMessage(body: unknown): string | null {
     return null;
   }
 
-  const detail = (body as { detail?: ErrorDetail }).detail;
+  const detail = (body as { detail?: ErrorDetail; error?: ErrorDetail }).detail;
   if (typeof detail === "string") {
     return detail;
   }
   if (detail && typeof detail === "object" && "message" in detail) {
     return detail.message ?? null;
+  }
+
+  const error = (body as { error?: ErrorDetail }).error;
+  if (typeof error === "string") {
+    return error;
+  }
+  if (error && typeof error === "object" && "message" in error) {
+    return error.message ?? null;
   }
 
   return null;
@@ -54,7 +62,7 @@ export async function requestRecommendation(
   } catch (error) {
     if (error instanceof TypeError) {
       throw new Error(
-        "추천 API에 연결할 수 없습니다. 백엔드 서버가 실행 중인지, CORS 설정에 localhost:3000이 포함되어 있는지 확인해 주세요.",
+        "추천 API에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해 주세요.",
       );
     }
 

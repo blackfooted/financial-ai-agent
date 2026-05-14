@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Financial AI Agent - Phase 1",
-  description: "Phase 1 financial product recommendation mock frontend",
+  description: "금융 상품 비교 추천 AI 에이전트 Phase 1",
 };
 
 export default function RootLayout({

@@ -11,6 +11,40 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.23] 2026-05-14
+
+### 변경 문서: frontend/phase1, frontend README, changelog.md
+
+- Phase 1 프론트엔드 UI 1차 개선
+- 향후 Phase 2~4 확장을 고려한 Phase 메뉴 구조 추가
+- Phase 1은 활성 메뉴로 표시하고 Phase 2~4는 준비 중 상태로 표시
+- Phase 2~4 메뉴명을 임의 확정하지 않고 “준비 중”으로 표시
+- `AppShell.tsx`, `PhaseSidebar.tsx` 공통 레이아웃 컴포넌트 추가
+- API 호출 URL을 `NEXT_PUBLIC_API_BASE_URL` 기준으로 관리하도록 정리
+- 상단 서비스 소개 및 면책 안내 영역 개선
+- 추천 입력 폼의 한글 표시명과 카드형 레이아웃 정리
+- 추천 결과 카드 UI 개선
+- 로딩, 오류, 부분 성공, 준비 중 상태 메시지 정리
+- 모바일 기본 대응 구조 정리
+- frontend README에 Phase 메뉴 구조와 API base URL 기준 설명 추가
+
+### 변경 사유
+
+- Phase 4까지 하나의 프론트엔드 화면에서 확장할 수 있는 기본 IA를 마련하기 위함
+- 포트폴리오 시연 시 현재 구현 범위와 향후 Phase 확장 구조를 명확히 보여주기 위함
+- 추천 API 연결 이후 사용자 화면의 가독성과 상태 표시를 개선하기 위함
+- 배포 환경에서 백엔드 API URL을 환경변수로 전환할 수 있도록 하기 위함
+
+### 영향 범위
+
+- frontend/phase1/app/page.tsx
+- frontend/phase1/app/layout.tsx
+- frontend/phase1/components/
+- frontend/phase1/lib/api.ts
+- frontend/phase1/.env.example
+- frontend/phase1/README.md
+- 후속 Phase 2~4 화면 확장
+
 ## [v0.22] 2026-05-14
 
 ### 변경 문서: README.md, local-runbook.md, changelog.md
