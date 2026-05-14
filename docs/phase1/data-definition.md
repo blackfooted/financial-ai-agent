@@ -373,3 +373,20 @@ AI 응답 파싱 실패 시 `summary`, `product_reasons`, `comparison_points`는
 - AI 추천 응답의 `product_reasons.rank`는 추천 후보 데이터의 `rank`와 매핑해 최종 응답을 결합한다.
 - Phase 1 캐시 만료 기준은 기본 24시간으로 설정하되, 실제 구현 시 외부 API 호출량과 배포 환경을 고려해 조정할 수 있다.
 - `financial_goal`은 AI 프롬프트 입력 데이터에 포함되지만 금감원 API 조회 파라미터로는 사용하지 않는다.
+
+## 금감원 API 원천 응답 매핑 보완 기준
+
+예금/적금 원천 응답은 `baseList`, `optionList` 형태로 구성될 수 있다.
+
+이번 단계에서 mapper의 `raw_product` 입력값은 `baseList` 배열의 단일 상품 기본 정보 항목을 의미한다.
+
+이번 단계에서는 상품 기본 정보 중심으로 mapper를 먼저 준비한다.
+
+- `kor_co_nm` → `company_name`
+- `fin_co_no` → `company_code`
+- `fin_prdt_cd` → `product_code`
+- `fin_prdt_nm` → `product_name`
+- `join_way` → `join_way`
+
+금리와 기간은 이번 단계에서 매핑하지 않는다.
+`base_rate`, `max_rate`, `period_months`는 `None`으로 처리하며, 실제 응답 샘플 확인 후 `optionList` 기반으로 별도 보완한다.

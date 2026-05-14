@@ -4,6 +4,8 @@ from json import JSONDecodeError
 from pathlib import Path
 from typing import Any
 
+from app.services.product_mapper import map_fss_product_to_normalized
+
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 SAMPLE_PRODUCTS_PATH = DATA_DIR / "sample_products.json"
@@ -27,6 +29,43 @@ def load_sample_products() -> dict[str, Any]:
         raise ValueError("샘플 상품 데이터는 meta와 products 목록을 포함해야 합니다.")
 
     return data
+
+
+def load_products_from_fss_response(
+    *,
+    fss_response: dict[str, Any],
+    product_type: str,
+    top_fin_grp_no: str,
+    financial_sector: str,
+    financial_sector_name: str,
+) -> dict[str, Any]:
+    """FSS 원천 응답을 내부 products 구조로 변환한다.
+
+    추천 API 기본 흐름은 아직 이 함수를 사용하지 않고 sample_products.json을 유지한다.
+    """
+    base_list = fss_response.get("result", {}).get("baseList", [])
+    if not isinstance(base_list, list):
+        raise ValueError("FSS API 응답의 result.baseList가 배열이 아닙니다.")
+
+    products = [
+        map_fss_product_to_normalized(
+            raw_product=raw_product,
+            product_type=product_type,
+            top_fin_grp_no=top_fin_grp_no,
+            financial_sector=financial_sector,
+            financial_sector_name=financial_sector_name,
+        )
+        for raw_product in base_list
+        if isinstance(raw_product, dict)
+    ]
+
+    return {
+        "meta": {
+            "provider": "fss",
+            "cache_used": False,
+        },
+        "products": products,
+    }
 
 
 if __name__ == "__main__":

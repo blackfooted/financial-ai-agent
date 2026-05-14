@@ -98,3 +98,34 @@ curl -X POST http://127.0.0.1:8000/api/phase1/recommendations \
   -H "Content-Type: application/json" \
   -d '{"product_type":"saving","age":29,"amount":500000,"saving_period_months":12,"financial_goal":"lump_sum","preferred_institutions":["bank"]}'
 ```
+
+## 금융감독원 API 연동 준비
+
+현재 상태:
+
+- `backend/app/services/fss_client.py` 추가
+- 예금/적금 상품 조회 함수 인터페이스 준비
+- 실제 추천 API 기본 흐름은 아직 `sample_products.json` mock 데이터를 사용
+- `FSS_API_KEY`가 없으면 실제 API 호출은 불가
+- 대출 상품 실제 API 연동은 후속 작업
+
+환경변수:
+
+```env
+FSS_API_KEY=
+```
+
+주의:
+
+- 실제 API Key는 `.env` 또는 Render 환경변수에만 설정하고 Git에 커밋하지 않습니다.
+- 추천 API 기본 흐름은 아직 FSS API를 호출하지 않습니다.
+
+### FSS API 단독 테스트
+
+`FSS_API_KEY`가 설정된 환경에서만 실행합니다.
+
+```bash
+python app/services/fss_client.py
+```
+
+이 테스트는 추천 API 기본 흐름과 별개입니다.

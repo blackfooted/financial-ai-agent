@@ -11,6 +11,39 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.28] 2026-05-14
+
+### 변경 문서: fss_client.py, product_mapper.py, product_loader.py, backend README, api-spec.md, data-definition.md, changelog.md
+
+- 금감원 API 실제 연동 준비를 위한 `fss_client.py` 추가
+- 예금/적금 상품 조회 함수 인터페이스 정의
+- `FSS_API_KEY` 환경변수 사용 기준 추가
+- 금감원 API 최종 요청 URL 예시 추가
+- 저축은행 `topFinGrpNo`가 `SAVINGS_BANK_TBD`인 경우 실제 호출 방지 가드 추가
+- 금감원 원천 응답의 `baseList` 단일 항목을 내부 정규화 상품 데이터로 변환하기 위한 `product_mapper.py` 추가
+- `optionList` 기반 금리/기간 매핑은 실제 응답 샘플 확인 후 후속 작업으로 분리
+- `fss_client.py` 직접 실행 테스트 블록 추가
+- 추천 API 기본 흐름은 기존 sample mock 데이터 사용 유지
+- 대출 실제 API 연동은 후속 작업으로 분리
+- API 명세와 데이터 정의 문서에 금감원 API 실제 연동 준비 기준 추가
+
+### 변경 사유
+
+- Render mock 배포 이후 실제 금융상품 데이터 연동을 준비하기 위함
+- OpenAI 실제 연동 전 실제 상품 데이터 구조와 mapper 기준을 먼저 마련하기 위함
+- 금감원 API 응답의 `baseList`와 `optionList` 분리 구조를 안전하게 다루기 위함
+- 저축은행 권역 코드 미확정 상태에서 잘못된 실제 호출이 발생하지 않도록 하기 위함
+
+### 영향 범위
+
+- backend/app/services/fss_client.py
+- backend/app/services/product_mapper.py
+- backend/app/services/product_loader.py
+- backend/README.md
+- docs/phase1/api-spec.md
+- docs/phase1/data-definition.md
+- 후속 금감원 API 실제 호출 테스트
+
 ## [v0.27] 2026-05-14
 
 ### 변경 문서: backend, frontend, README.md, local-runbook.md, deployment-plan.md, api-spec.md, changelog.md

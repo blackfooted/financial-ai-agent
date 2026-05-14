@@ -443,3 +443,26 @@ POST /api/phase4/...
 
 - 현재 API path는 변경하지 않는다.
 - 프론트엔드 API 호출 경로도 `/api/phase1/recommendations`를 유지한다.
+
+---
+
+## 16. 금감원 API 실제 연동 기준
+
+Phase 1의 실제 상품 데이터 연동은 예금과 적금부터 진행한다.
+
+- 예금: `depositProductsSearch.json`
+- 적금: `savingProductsSearch.json`
+- 대출: 후속 작업으로 분리
+
+최종 요청 URL 예시는 아래와 같다.
+
+```text
+https://finlife.fss.or.kr/finlifeapi/depositProductsSearch.json?auth=KEY&topFinGrpNo=020000&pageNo=1
+https://finlife.fss.or.kr/finlifeapi/savingProductsSearch.json?auth=KEY&topFinGrpNo=020000&pageNo=1
+```
+
+현재 추천 API는 기본적으로 sample mock 데이터를 사용한다.
+
+금감원 API client와 mapper는 실제 연동 준비 단계로 추가하며, 추천 API 기본 흐름 전환은 별도 작업으로 진행한다.
+
+저축은행 `topFinGrpNo`가 `SAVINGS_BANK_TBD` 상태일 때는 실제 API 호출을 금지한다.
