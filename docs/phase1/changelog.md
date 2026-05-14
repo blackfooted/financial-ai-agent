@@ -11,6 +11,30 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.17] 2026-05-14
+
+### 변경 문서: shared/openai_client.py, shared/README.md, changelog.md
+
+- Phase 1 OpenAI 공통 클라이언트 mock 구현
+- `generate_recommendation_explanation` 함수 인터페이스 정의
+- AI 응답 구조를 `ai-policy.md`와 `data-definition.md` 기준으로 정리
+- 추천 후보 텍스트에서 rank를 추출해 mock `product_reasons`를 생성하는 기준 추가
+- 대출 상품 선택 시 승인 여부, 한도, 개인별 금리 단정 금지 유의사항 추가
+- `shared/README.md`에 openai_client.py 역할 설명 추가
+
+### 변경 사유
+
+- 실제 OpenAI API 연동 전 공통 호출 인터페이스를 먼저 고정하기 위함
+- 추천 API mock 구현 시 AI 응답 구조를 안정적으로 사용할 수 있도록 하기 위함
+- 추후 실제 OpenAI SDK 연결 시 변경 범위를 `shared/openai_client.py`로 제한하기 위함
+
+### 영향 범위
+
+- shared/openai_client.py
+- shared/README.md
+- Phase 1 추천 API mock 구현
+- Phase 1 AI 응답 파싱 및 최종 응답 조립 로직
+
 ## [v0.16] 2026-05-14
 
 ### 변경 문서: backend/phase1, shared, .env.example, .gitignore, changelog.md
