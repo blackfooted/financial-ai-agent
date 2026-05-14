@@ -7,12 +7,25 @@ Phase 1 백엔드 서비스 로직을 배치하는 폴더입니다.
 - `product_loader.py`: 샘플 상품 데이터 로드 및 FSS 응답 변환 준비
 - `recommendation_service.py`: 기존 mock 추천 API 비즈니스 로직
 - `fss_client.py`: 금융감독원 금융상품통합비교공시 API 호출 준비 클라이언트
-- `product_mapper.py`: FSS `baseList` 단일 항목을 내부 정규화 상품 데이터로 변환하는 mapper
+- `product_mapper.py`: FSS `baseList`와 `optionList`를 내부 정규화 상품 데이터로 변환하는 mapper
+
+## product_mapper.py
+
+FSS API의 `baseList`와 `optionList` 응답을 내부 정규화 상품 데이터로 변환합니다.
+
+현재 구현 범위:
+
+- `baseList` 단일 상품 항목 매핑
+- `optionList`에서 기간/금리 정보 선택
+- `fin_co_no + fin_prdt_cd` 기준 baseList와 optionList 결합
+- 예금/적금의 `intr_rate`, `intr_rate2`, `save_trm` 매핑
+- 적금의 `rsrv_type`, `rsrv_type_nm`은 후속 확장 대상으로 유지
+- 직접 실행 시 저장된 FSS 샘플 파일 기반 mapper 결과 확인 가능
+
+실제 추천 API는 아직 `sample_products.json` mock 데이터를 사용합니다.
 
 ## 구현 기준
 
 - 추천 API 기본 흐름은 아직 `sample_products.json` mock 데이터를 사용합니다.
 - `fss_client.py`는 단독 테스트와 후속 실제 연동 준비를 위한 모듈입니다.
-- `product_mapper.py`는 이번 단계에서 상품 기본 정보만 매핑합니다.
-- 금리와 기간은 실제 응답 샘플 확인 후 `optionList` 기반 mapper로 보완합니다.
 - 실제 OpenAI API 호출과 실제 금융감독원 API 호출을 추천 API 기본 흐름에 연결하지 않습니다.

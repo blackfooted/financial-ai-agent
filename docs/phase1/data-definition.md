@@ -1,5 +1,37 @@
 # data-definition.md
 
+## FSS API 실제 응답 확인 결과
+
+### baseList 확인 항목
+
+| 원천 필드 | 의미 | 정규화 필드 | 확인 상태 |
+|---|---|---|---|
+| `fin_co_no` | 금융회사 코드 | `company_code` | 확인됨 |
+| `kor_co_nm` | 금융회사명 | `company_name` | 확인됨 |
+| `fin_prdt_cd` | 상품 코드 | `product_code` | 확인됨 |
+| `fin_prdt_nm` | 상품명 | `product_name` | 확인됨 |
+| `join_way` | 가입 방법 | `join_way` | 확인됨 |
+
+### optionList 확인 항목
+
+| 원천 필드 | 의미 | 정규화 필드 | 확인 상태 |
+|---|---|---|---|
+| `fin_co_no` | 금융회사 코드 | 매칭 키 | 확인됨 |
+| `fin_prdt_cd` | 상품 코드 | 매칭 키 | 확인됨 |
+| `intr_rate` | 기본 금리 | `base_rate` | 확인됨 |
+| `intr_rate2` | 최고 우대 금리 | `max_rate` | 확인됨 |
+| `save_trm` | 저축 기간 | `period_months` | 확인됨 |
+| `intr_rate_type` | 금리 유형 코드 | 후속 검토 | 확인됨 |
+| `intr_rate_type_nm` | 금리 유형명 | 후속 검토 | 확인됨 |
+| `rsrv_type` | 적립 유형 코드 | 후속 검토 | 적금에서 확인됨 |
+| `rsrv_type_nm` | 적립 유형명 | 후속 검토 | 적금에서 확인됨 |
+
+예금과 적금 모두 `fin_co_no + fin_prdt_cd`를 기준으로 `baseList`와 `optionList`를 결합한다.
+
+Phase 1 mapper는 우선 선택된 option 1개를 기준으로 `base_rate`, `max_rate`, `period_months`를 정규화한다.
+
+`preferred_period_months`가 있으면 해당 기간의 option을 우선 선택하고, 없거나 일치 옵션이 없으면 최고 우대금리(`intr_rate2`)가 가장 높은 option을 선택한다.
+
 # 금융 상품 비교 추천 AI 에이전트 데이터 정의
 
 ## 1. 문서 목적

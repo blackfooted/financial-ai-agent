@@ -1,0 +1,113 @@
+{
+  "result": {
+    "prdt_div": "D",
+    "total_count": 37,
+    "err_cd": "000",
+    "err_msg": "정상",
+    "baseList": [
+      {
+        "dcls_month": "202604",
+        "fin_co_no": "0010001",
+        "fin_prdt_cd": "WR0001B",
+        "kor_co_nm": "우리은행",
+        "fin_prdt_nm": "WON플러스예금",
+        "join_way": "인터넷,스마트폰,전화(텔레뱅킹)",
+        "mtrt_int": "만기 후\n- 1개월이내 : 만기시점약정이율×50%\n- 1개월초과 6개월이내: 만기시점약정이율×30%\n- 6개월초과 : 만기시점약정이율×20%\n\n※ 만기시점 약정이율 : 일반정기예금 금리",
+        "spcl_cnd": "해당사항 없음",
+        "join_deny": "1",
+        "join_member": "실명의 개인",
+        "etc_note": "- 가입기간: 1~36개월\n- 최소가입금액: 1만원 이상\n- 만기일을 일,월 단위로 자유롭게 선택 가능\n- 만기해지 시 신규일 당시 영업점과 인터넷 홈페이지에 고시된 계약기간별 금리 적용",
+        "max_limit": null,
+        "dcls_strt_day": "20260420",
+        "dcls_end_day": null,
+        "fin_co_subm_day": "202604200952"
+      },
+      {
+        "dcls_month": "202604",
+        "fin_co_no": "0010002",
+        "fin_prdt_cd": "00320342",
+        "kor_co_nm": "한국스탠다드차타드은행",
+        "fin_prdt_nm": "e-그린세이브예금",
+        "join_way": "인터넷,스마트폰",
+        "mtrt_int": "만기 후 1개월: 약정이율의 50%\n만기 후 1개월 초과 1년 이내: 약정이율의 30%\n만기 후 1년 초과: 약정이율의 10%",
+        "spcl_cnd": "1.SC제일은행 최초 거래 신규고객에 대하여 우대 이율을 제공함 (보너스이율0.2%)                     2.SC제일마이백통장에서 출금하여 이 예금을 신규하는경우에 보너스이율을 제공함\n(가입기간:1년제/ 보너스이율:0.1% / 만기해약하는 경우에 한해 보너스이율을 적용함)",
+        "join_deny": "1",
+        "join_member": "개인(개인사업자 포함)",
+        "etc_note": "디지털채널 전용상품 (인터넷, 모바일뱅킹)",
+        "max_limit": 1000000000,
+        "dcls_strt_day": "20260420",
+        "dcls_end_day": "99991231",
+        "fin_co_subm_day": "202604200949"
+      },
+      {
+        "dcls_month": "202604",
+        "fin_co_no": "0010016",
+        "fin_prdt_cd": "10511008001166004",
+        "kor_co_nm": "아이엠뱅크",
+        "fin_prdt_nm": "iM함께예금",
+        "join_way": "영업점,인터넷,스마트폰",
+        "mtrt_int": "만기 후 1개월 미만 경과 : 약정이자율 x 50%\n만기 후 3개월 미만 경과 : 약정이자율 x 25% \n만기 후 3개월 이상 경과 : 약정이자율 x 10%",
+        "spcl_cnd": "* 최고우대금리: 연0.45%p\n- 전월 총수신 평잔 30만원 이상 또는 상품 가입 전 첫만남플러스통장 보유\n- 상품 가입 전 당행 주택청약상품 보유\n- 신규일 \"iM함께적금\" 동시 가입 및 만기(12회 불입) 보유 \n- 당행 오픈뱅킹서비스에 다른 은행 계좌 등록\n각 연0.10%p                       \n* 해당 상품을 인터넷/모바일뱅킹을 통해 가입: 연0.05%p",
+        "join_deny": "1",
+        "join_member": "실명의 개인 및 개인사업자",
+        "etc_note": "계좌당 가입 최저한도 : 100만원",
+        "max_limit": null,
+        "dcls_strt_day": "20260420",
+        "dcls_end_day": null,
+        "fin_co_subm_day": "202604200900"
+      }
+    ],
+    "optionList": [
+      {
+        "dcls_month": "202604",
+        "fin_co_no": "0010001",
+        "fin_prdt_cd": "WR0001B",
+        "intr_rate_type": "S",
+        "intr_rate_type_nm": "단리",
+        "save_trm": "1",
+        "intr_rate": 2.55,
+        "intr_rate2": 2.55
+      },
+      {
+        "dcls_month": "202604",
+        "fin_co_no": "0010001",
+        "fin_prdt_cd": "WR0001B",
+        "intr_rate_type": "S",
+        "intr_rate_type_nm": "단리",
+        "save_trm": "3",
+        "intr_rate": 2.65,
+        "intr_rate2": 2.65
+      },
+      {
+        "dcls_month": "202604",
+        "fin_co_no": "0010001",
+        "fin_prdt_cd": "WR0001B",
+        "intr_rate_type": "S",
+        "intr_rate_type_nm": "단리",
+        "save_trm": "6",
+        "intr_rate": 2.8,
+        "intr_rate2": 2.8
+      },
+      {
+        "dcls_month": "202604",
+        "fin_co_no": "0010001",
+        "fin_prdt_cd": "WR0001B",
+        "intr_rate_type": "S",
+        "intr_rate_type_nm": "단리",
+        "save_trm": "12",
+        "intr_rate": 2.9,
+        "intr_rate2": 2.9
+      },
+      {
+        "dcls_month": "202604",
+        "fin_co_no": "0010001",
+        "fin_prdt_cd": "WR0001B",
+        "intr_rate_type": "S",
+        "intr_rate_type_nm": "단리",
+        "save_trm": "24",
+        "intr_rate": 2.4,
+        "intr_rate2": 2.4
+      }
+    ]
+  }
+}

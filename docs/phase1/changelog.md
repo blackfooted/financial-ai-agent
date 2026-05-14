@@ -11,6 +11,31 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.29] 2026-05-14
+
+### 변경 문서: product_mapper.py, services/README.md, data-definition.md, changelog.md
+
+- FSS 예금/적금 응답 샘플 기반 `optionList` 매핑 보완
+- `fin_co_no + fin_prdt_cd` 기준 baseList와 optionList 결합 기준 구현
+- `intr_rate`, `intr_rate2`, `save_trm`을 `base_rate`, `max_rate`, `period_months`로 정규화
+- 예금/적금 optionList 구조 차이를 product_type 기준으로 분기
+- mapper 단독 실행 테스트 블록 추가
+- data-definition.md에 실제 응답 샘플 기준 필드 확인 상태 반영
+- services README에 product_mapper.py 역할 설명 보완
+
+### 변경 사유
+
+- 실제 FSS API 응답 구조를 기반으로 정규화 상품 데이터 매핑을 구체화하기 위함
+- 추천 API를 FSS 데이터 기반으로 전환하기 전 mapper 단독 검증이 가능하도록 하기 위함
+- OpenAI 실제 연동 전 추천 후보 데이터 품질을 안정화하기 위함
+
+### 영향 범위
+
+- backend/app/services/product_mapper.py
+- backend/app/services/README.md
+- docs/phase1/data-definition.md
+- 후속 추천 API FSS 데이터 전환 작업
+
 ## [v0.28] 2026-05-14
 
 ### 변경 문서: fss_client.py, product_mapper.py, product_loader.py, backend README, api-spec.md, data-definition.md, changelog.md
