@@ -11,6 +11,33 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.26] 2026-05-14
+
+### 변경 문서: deployment-plan.md, changelog.md
+
+- Phase 1 Render 배포 준비 문서 추가
+- 이전 단계 전제 조건을 프론트엔드 UI 2차 개선 완료 기준으로 정리
+- `local-runbook.md`는 실제 파일 존재 여부를 확인한 뒤 참고하도록 기준 추가
+- Render 배포 권장 순서 추가
+- 프론트엔드 `package.json`의 `start` script 확인 기준 추가
+- `NEXT_PUBLIC_API_BASE_URL`과 `ALLOWED_ORIGINS` 설정 순서 정리
+- Render Free 티어 슬립 모드 완화 방안으로 외부 핑 서비스 검토 가능성 추가
+- UptimeRobot 등 외부 핑 서비스는 선택 검토 사항이며 Render 무료 플랜 정책은 배포 시점에 재확인하도록 명시
+- 배포 전 체크리스트와 Known Issues 보완
+
+### 변경 사유
+
+- Render 최초 배포 시 백엔드와 프론트엔드 URL 설정 순서로 인한 혼선을 줄이기 위함
+- 존재하지 않는 문서를 전제로 배포 문서가 작성되는 문제를 방지하기 위함
+- Next.js 프론트엔드 Web Service 실행 시 `start` script 누락으로 인한 배포 실패 가능성을 사전에 점검하기 위함
+- Render Free 티어의 첫 요청 지연을 포트폴리오 시연 전에 인지하고 완화 방안을 검토할 수 있도록 하기 위함
+
+### 영향 범위
+
+- docs/phase1/deployment-plan.md
+- docs/phase1/changelog.md
+- 후속 Render 배포 작업
+
 ## [v0.25] 2026-05-14
 
 ### 변경 문서: frontend/phase1, frontend README, changelog.md
