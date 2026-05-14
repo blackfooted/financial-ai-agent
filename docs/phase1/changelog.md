@@ -11,6 +11,34 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.18] 2026-05-14
+
+### 변경 문서: sample_products.json, product_loader.py, services/README.md, changelog.md
+
+- Phase 1 추천 API mock 구현을 위한 샘플 금융상품 데이터 추가
+- 예금, 적금, 대출 샘플 상품 데이터 구성
+- 제1금융권/제2금융권 샘플 데이터 포함
+- 대출 상품의 `period_months`는 상환 기간으로 해석한다는 기준 반영
+- 실제 금융감독원 API 응답이 아닌 mock 데이터임을 명시
+- 샘플 상품 데이터 로더 `product_loader.py` 추가
+- `load_sample_products()` 반환 구조를 `{"meta": {...}, "products": [...]}`로 정의
+- 상품 데이터 로더 직접 실행 시 상품 개수와 유형별 개수 확인 가능
+- services README에 product_loader.py 역할 설명 추가
+
+### 변경 사유
+
+- 추천 API mock 구현 전 정규화 상품 데이터 구조를 실제 파일로 고정하기 위함
+- 외부 API 호출 없이 로컬에서 추천 API 응답을 구성할 수 있는 기반을 마련하기 위함
+- 향후 금감원 API adapter/mapper 구현 전 샘플 데이터 기반으로 흐름을 검증하기 위함
+- 대출의 `period_months` 의미와 로더 반환 구조를 명확히 해 후속 추천 API 구현 혼선을 줄이기 위함
+
+### 영향 범위
+
+- backend/phase1/app/data/sample_products.json
+- backend/phase1/app/services/product_loader.py
+- backend/phase1/app/services/README.md
+- 후속 추천 API mock 구현
+
 ## [v0.17] 2026-05-14
 
 ### 변경 문서: shared/openai_client.py, shared/README.md, changelog.md
