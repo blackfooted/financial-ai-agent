@@ -27,7 +27,7 @@
 
 - Backend: Python, FastAPI
 - Frontend: Next.js App Router, Tailwind CSS
-- AI: OpenAI API, GPT-5.4 nano
+- AI: OpenAI API, GPT-4o-mini
 - Data: 금융감독원 금융상품통합비교공시 API
 - Deploy: Render Free Tier
 
@@ -66,3 +66,8 @@ financial-ai-agent/
 본 서비스는 금융상품 탐색을 돕기 위한 참고용 도구입니다.  
 제공되는 추천 결과는 금융상품 가입 권유, 투자 권유 또는 금융 자문을 목적으로 하지 않습니다.  
 실제 가입 전에는 반드시 해당 금융회사와 금융감독원 공시 정보를 확인해야 합니다.
+## 로컬 실행
+
+Phase 1 로컬 실행 및 검증 방법은 아래 문서를 참고합니다.
+
+- `docs/phase1/local-runbook.md`

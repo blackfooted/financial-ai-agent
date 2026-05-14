@@ -11,6 +11,56 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.22] 2026-05-14
+
+### 변경 문서: README.md, local-runbook.md, changelog.md
+
+- README.md 기술 스택의 AI 모델명을 `GPT-5.4 nano`에서 `GPT-4o-mini`로 수정
+- local-runbook.md의 404 응답 대응 기준을 요청 URL 경로 확인 중심으로 수정
+- `NO_RECOMMENDABLE_PRODUCTS`와 일반 경로 404를 구분해 확인하도록 안내 추가
+- changelog 내 잘못된 모델명 표기가 있는 경우 함께 정정
+
+### 변경 사유
+
+- 포트폴리오 첫 화면에 노출되는 AI 모델명을 프로젝트 환경변수 기준과 일치시키기 위함
+- 404 응답을 조건 조정 문제로 오해하지 않도록 로컬 실행 가이드의 오류 대응 기준을 명확히 하기 위함
+- 추천 상품 없음 응답과 API 경로 오류를 구분해 디버깅할 수 있도록 하기 위함
+
+### 영향 범위
+
+- README.md
+- docs/phase1/local-runbook.md
+- docs/phase1/changelog.md
+
+## [v0.21] 2026-05-14
+
+### 변경 문서: local-runbook.md, README.md, changelog.md
+
+- Phase 1 로컬 실행 및 검증 가이드 작성
+- 백엔드와 프론트엔드 실행 순서 정리
+- End-to-End 추천 검증 시나리오 추가
+- 상품 유형과 금융 목적 불일치 시나리오 검증 기준 보완
+- 추천 API 직접 검증 명령 추가
+- 정상 응답 기준과 오류 상황별 확인 방법 정리
+- 3000/8000 포트 충돌 상황 확인 방법 추가
+- npm moderate 취약점 등 Known Issues 정리
+- 배포 전 확인 사항 체크리스트 추가
+- 루트 README에 local-runbook.md 링크 추가
+
+### 변경 사유
+
+- 백엔드와 프론트엔드 mock 구현 완료 후 로컬 검증 절차를 문서화하기 위함
+- Render 배포 전 실행 순서, 검증 기준, known issues를 명확히 하기 위함
+- 포트 충돌, CORS, API 연결 실패 등 로컬 실행 중 자주 발생할 수 있는 문제를 사전에 정리하기 위함
+- 포트폴리오 검토자가 프로젝트 실행 방법을 빠르게 확인할 수 있도록 하기 위함
+
+### 영향 범위
+
+- docs/phase1/local-runbook.md
+- README.md
+- 후속 배포 문서
+- 후속 UI 개선 작업
+
 ## [v0.20] 2026-05-14
 
 ### 변경 문서: frontend/phase1, .gitignore, changelog.md
