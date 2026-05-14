@@ -11,6 +11,43 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.19] 2026-05-14
+
+### 변경 문서: schemas.py, recommendations.py, recommendation_service.py, main.py, backend README, services/README.md, requirements.txt, changelog.md
+
+- `POST /api/phase1/recommendations` mock API 구현
+- Pydantic v2 기준 추천 요청/응답 스키마 추가
+- `pydantic>=2.0` 의존성 명시
+- 샘플 상품 데이터 기반 상품 유형, 금융권역, 기간 필터링 구현
+- 기간 필터 폴백 시 `product_type + preferred_institutions` 필터 통과 후보 전체를 유지하는 기준 구현
+- 금리 기준 정렬 및 상위 최대 5개 추천 후보 생성
+- `shared/openai_client.py` mock 호출 연동
+- Repo 루트를 `sys.path`에 추가해 `shared` 모듈 import 경로 보완
+- `request_id`는 동일 초 내 중복 가능성이 있으나 Phase 1에서는 허용한다는 기준 주석 추가
+- AI mock 응답과 추천 후보를 rank 기준으로 결합
+- `success`, `partial_success`, `NO_RECOMMENDABLE_PRODUCTS` 처리 기준 구현
+- 추천 라우터를 FastAPI main 앱에 등록
+- backend README에 추천 API mock 검증 예시 추가
+- services README에 recommendation_service.py 역할 설명 추가
+
+### 변경 사유
+
+- Phase 1 핵심 추천 API를 실제 외부 API 호출 없이 로컬 mock 데이터 기반으로 검증하기 위함
+- 프론트엔드 구현 전 API 요청/응답 구조를 FastAPI에서 확인하기 위함
+- OpenAI와 금감원 API 실제 연동 전 추천 흐름을 end-to-end로 검증하기 위함
+- `shared` 모듈 import 경로와 Pydantic 버전 기준을 명확히 해 실행 오류를 줄이기 위함
+
+### 영향 범위
+
+- backend/phase1/app/schemas.py
+- backend/phase1/app/routes/recommendations.py
+- backend/phase1/app/services/recommendation_service.py
+- backend/phase1/app/main.py
+- backend/phase1/requirements.txt
+- backend/phase1/README.md
+- backend/phase1/app/services/README.md
+- 후속 프론트엔드 추천 화면 구현
+
 ## [v0.18] 2026-05-14
 
 ### 변경 문서: sample_products.json, product_loader.py, services/README.md, changelog.md

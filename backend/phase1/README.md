@@ -46,4 +46,26 @@ curl http://127.0.0.1:8000/health
 - FastAPI 앱 기본 구조
 - `/health` 엔드포인트
 - 환경변수 로딩 기준
-- 추천 API는 후속 단계에서 구현
+- 추천 API mock 구현
+
+## 추천 API mock 검증
+
+아래 명령은 `backend/phase1` 경로에서 서버를 실행한 뒤 다른 터미널에서 실행합니다.
+
+### Windows PowerShell
+
+```powershell
+Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/phase1/recommendations" `
+  -Method POST `
+  -ContentType "application/json" `
+  -Body '{"product_type":"saving","age":29,"amount":500000,"saving_period_months":12,"financial_goal":"lump_sum","preferred_institutions":["bank"]}'
+```
+
+### Mac/Linux
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/phase1/recommendations \
+  -H "Content-Type: application/json" \
+  -d '{"product_type":"saving","age":29,"amount":500000,"saving_period_months":12,"financial_goal":"lump_sum","preferred_institutions":["bank"]}'
+```
