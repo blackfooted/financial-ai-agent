@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Phase 1 MVP에서는 shared 모듈 import를 위해 Repo 루트를 sys.path에 추가한다.
 # 후속 패키징 단계에서는 더 정식 구조로 개선할 수 있다.
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.append(str(REPO_ROOT))
 

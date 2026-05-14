@@ -11,6 +11,42 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.27] 2026-05-14
+
+### 변경 문서: backend, frontend, README.md, local-runbook.md, deployment-plan.md, api-spec.md, changelog.md
+
+- 실행 앱 구조를 `backend/phase1`, `frontend/phase1`에서 `backend`, `frontend`로 리팩토링
+- 향후 Phase 2~4를 하나의 프론트엔드와 하나의 백엔드에서 확장할 수 있도록 구조 정리
+- Git 이동 이력 보존을 위해 추적 파일은 가능한 한 `git mv` 기준으로 이동
+- 기존 `backend/phase1/.venv`, `frontend/phase1/node_modules`, `frontend/phase1/.next` 등 비추적 실행 산출물은 이동하지 않음
+- Repo 루트의 `shared/` 위치는 유지하고 백엔드에서 Repo 루트를 `sys.path`에 추가하는 방식으로 import 경로 보완
+- `backend/README.md`에 새 구조 기준 가상환경 재생성 안내 추가
+- 백엔드 실행 경로와 README 실행 명령 수정
+- 프론트엔드 실행 경로와 README 실행 명령 수정
+- 프론트엔드 설정 파일에서 폴더 경로로서의 `phase1` 참조를 점검
+- Render 배포 문서의 Root Directory를 `backend`, `frontend`로 수정
+- local-runbook.md의 로컬 실행 경로 수정
+- API path는 `/api/phase1/recommendations`를 유지하고 Phase 2 이후 `/api/phase2/...` 방식으로 확장하는 기준 기록
+- 기능명 기반 API path 전환은 Phase 4 완료 후 검토하기로 결정
+- 작업 실패 시 shared import 오류, build 실패, 응답 구조 변경 여부를 기준으로 중단하도록 기준 정리
+
+### 변경 사유
+
+- Phase 4까지 하나의 프론트엔드 앱과 하나의 백엔드 앱에서 메뉴별 기능을 확장하기 위함
+- Phase별 앱 폴더 분리가 장기적으로 배포, CORS, 공통 모듈 재사용을 복잡하게 만들 수 있기 때문
+- Render 배포 전 Root Directory와 실행 구조를 실제 최종 구조에 맞추기 위함
+
+### 영향 범위
+
+- backend/
+- frontend/
+- shared/
+- README.md
+- docs/phase1/local-runbook.md
+- docs/phase1/deployment-plan.md
+- docs/phase1/api-spec.md
+- 후속 Phase 2~4 기능 추가
+
 ## [v0.26] 2026-05-14
 
 ### 변경 문서: deployment-plan.md, changelog.md

@@ -1,20 +1,20 @@
-# Phase 1 Frontend
+# Frontend
 
 ## 실행 목적
 
-금융 상품 비교 추천 AI 에이전트 Phase 1 프론트엔드입니다.
+금융 상품 비교 추천 AI 에이전트 프론트엔드입니다.
+
+현재 Phase 1 화면을 구현했으며, 향후 여러 금융 AI 에이전트를 같은 앱에서 확장할 수 있도록 상단 GNB 형태의 메뉴 구조를 포함합니다.
 
 ## 실행 방법
 
 ```bash
-cd frontend/phase1
+cd frontend
 npm install
 npm run dev
 ```
 
 ## 화면 구조
-
-Phase 1 프론트엔드는 향후 여러 금융 AI 에이전트를 같은 앱에서 확장할 수 있도록 상단 GNB 형태의 메뉴 구조를 포함합니다.
 
 현재 메뉴 구성:
 
@@ -40,7 +40,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 추천 API를 사용하려면 백엔드가 먼저 실행되어 있어야 합니다.
 
 ```bash
-cd backend/phase1
+cd backend
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 

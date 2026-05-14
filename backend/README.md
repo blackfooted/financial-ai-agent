@@ -4,12 +4,41 @@
 
 금융 상품 비교 추천 AI 에이전트 Phase 1 백엔드입니다.
 
+## 가상환경 안내
+
+리팩토링 전 사용하던 `backend/phase1/.venv`는 새 구조에서 재사용하지 않습니다.
+
+새 구조에서는 `backend/` 위치에서 가상환경을 다시 생성합니다.
+
+### Windows PowerShell
+
+```powershell
+cd backend
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+### Mac/Linux
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+주의:
+
+- 기존 `.venv`는 Git 추적 대상이 아니므로 이동하지 않습니다.
+- 새 구조에서 실행할 때는 `backend/.venv`를 사용합니다.
+
 ## 실행 방법
 
 ### Windows PowerShell
 
 ```powershell
-cd backend/phase1
+cd backend
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -19,7 +48,7 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ### Mac/Linux
 
 ```bash
-cd backend/phase1
+cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -50,7 +79,7 @@ curl http://127.0.0.1:8000/health
 
 ## 추천 API mock 검증
 
-아래 명령은 `backend/phase1` 경로에서 서버를 실행한 뒤 다른 터미널에서 실행합니다.
+아래 명령은 `backend` 경로에서 서버를 실행한 뒤 다른 터미널에서 실행합니다.
 
 ### Windows PowerShell
 
