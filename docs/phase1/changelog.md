@@ -11,6 +11,43 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.25] 2026-05-14
+
+### 변경 문서: frontend/phase1, frontend README, changelog.md
+
+- GNB 탭명을 금융 AI 에이전트 Phase 후보 기준으로 정리
+- 활성 탭 하단 언더라인 및 준비 중 탭 흐림 처리 적용
+- 페이지 타이틀 영역에 짧은 면책 문구를 항상 표시
+- 입력 폼에 필수/선택 구분 표시 추가
+- 금액 입력 필드에 원 단위 표시 추가
+- 나이/금액 입력 필드 그리드 표시 문제 수정
+- 입력 폼 카드 높이 정렬 개선
+- 추천 결과 화면에서 `request_id` 노출 제거
+- 상품 카드 간격 및 좌측 액센트 라인 추가
+- 예금/적금 상품 카드에 단순 예상 이자 계산 표시 추가
+- 비교 포인트 영역을 독립 박스로 분리
+- 빈 결과 상태 안내 문구 보완
+- 결과 하단 면책 문구 색상 조정
+- API base URL을 `NEXT_PUBLIC_API_BASE_URL` 기준으로 관리하도록 확인
+- frontend README에 GNB 메뉴 구조와 환경변수 기준 반영
+
+### 변경 사유
+
+- Phase 4까지 하나의 프론트엔드 앱에서 확장할 수 있는 메뉴 구조를 명확히 하기 위함
+- 금융 서비스 화면에서 입력 단위, 필수 여부, 면책 문구를 명확히 표시하기 위함
+- 추천 결과 카드의 정보 전달력을 높이고 사용자에게 불필요한 디버깅 정보를 제거하기 위함
+- 예금/적금 상품 비교 시 단순 예상 이자 정보를 제공해 포트폴리오 시연 효과를 높이기 위함
+- Render 배포 시 백엔드 API URL을 환경변수로 전환할 수 있도록 하기 위함
+
+### 영향 범위
+
+- frontend/phase1/app/page.tsx
+- frontend/phase1/components/
+- frontend/phase1/lib/api.ts
+- frontend/phase1/.env.example
+- frontend/phase1/README.md
+- 후속 프론트엔드 UI 고도화
+
 ## [v0.24] 2026-05-14
 
 ### 변경 문서: frontend/phase1, frontend README, changelog.md

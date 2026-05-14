@@ -58,32 +58,27 @@ function formatPeriod(value: number | null) {
 }
 
 function calculateInterest(
+  productType: ProductType,
   amount: number,
   rate: number | null,
   periodMonths: number | null,
 ) {
-  if (!amount || rate === null || periodMonths === null) {
+  if (
+    productType === "loan" ||
+    !amount ||
+    rate === null ||
+    periodMonths === null
+  ) {
     return null;
   }
 
+  if (productType === "saving") {
+    return Math.round(
+      amount * periodMonths * ((periodMonths + 1) / 2) * (rate / 100 / 12),
+    );
+  }
+
   return Math.round(amount * (rate / 100) * (periodMonths / 12));
-}
-
-function getInterestLabel(productType: ProductType) {
-  if (productType === "deposit") {
-    return "예상 이자";
-  }
-  if (productType === "loan") {
-    return "단순 예상 이자 부담";
-  }
-  return "단순 예상 이자";
-}
-
-function getInterestNotice(productType: ProductType) {
-  if (productType === "loan") {
-    return "실제 상환액은 상환 방식, 기간, 심사 결과에 따라 달라질 수 있습니다.";
-  }
-  return "우대조건 충족 여부, 세금, 상품 조건에 따라 실제 이자는 달라질 수 있습니다.";
 }
 
 export default function Home() {
@@ -154,21 +149,23 @@ export default function Home() {
 
   return (
     <AppShell>
-      <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="grid items-stretch gap-6 lg:grid-cols-[380px_1fr]">
+        <section className="h-full self-stretch rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex flex-col gap-1">
-            <p className="text-sm font-semibold text-emerald-700">Phase 1</p>
             <h2 className="text-xl font-semibold tracking-tight">
               추천 조건 입력
             </h2>
             <p className="text-sm text-slate-600">
               필수 항목을 입력하면 mock 추천 API를 호출합니다.
             </p>
+            <p className="mt-2 text-xs font-semibold text-emerald-700">
+              * 필수 입력 항목
+            </p>
           </div>
 
           <form className="mt-6 flex flex-col gap-4" onSubmit={handleSubmit}>
             <label className="flex flex-col gap-2 text-sm font-medium text-slate-800">
-              상품 유형 <span className="sr-only">필수</span>
+              상품 유형 *
               <select
                 className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                 required
@@ -187,7 +184,7 @@ export default function Home() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-800">
-                나이
+                나이 *
                 <input
                   className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                   min={1}
@@ -199,12 +196,12 @@ export default function Home() {
               </label>
 
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-800">
-                금액
+                금액(원) *
                 <div className="flex rounded-md border border-slate-300 bg-white focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100">
                   <input
                     className="min-w-0 flex-1 rounded-l-md px-3 py-2 text-sm outline-none"
                     min={1}
-                    placeholder="500000 (오십만 원)"
+                    placeholder="예: 500000"
                     required
                     type="number"
                     value={amount}
@@ -218,7 +215,7 @@ export default function Home() {
             </div>
 
             <label className="flex flex-col gap-2 text-sm font-medium text-slate-800">
-              가입/이용 기간
+              가입/이용 기간 (선택)
               <select
                 className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                 value={savingPeriodMonths}
@@ -233,7 +230,7 @@ export default function Home() {
             </label>
 
             <label className="flex flex-col gap-2 text-sm font-medium text-slate-800">
-              금융 목적
+              금융 목적 *
               <select
                 className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                 required
@@ -251,10 +248,9 @@ export default function Home() {
             </label>
 
             <label className="flex flex-col gap-2 text-sm font-medium text-slate-800">
-              선호 금융권역
+              선호 금융권역 (선택)
               <select
                 className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                required
                 value={preferredInstitution}
                 onChange={(event) =>
                   setPreferredInstitution(
@@ -280,7 +276,7 @@ export default function Home() {
           </form>
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <section className="h-full self-stretch rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <h2 className="text-xl font-semibold tracking-tight">추천 결과</h2>
 
           <p
@@ -304,25 +300,27 @@ export default function Home() {
                   가입 기간이나 금융권역 조건을 바꿔 다시 시도해 보세요.
                 </p>
               ) : (
-                <div className="grid gap-4">
+                <div className="grid gap-5">
                   {response.recommended_products.map((product) => {
                     const baseInterest = calculateInterest(
+                      product.product_type,
                       amount,
                       product.base_rate,
                       product.period_months,
                     );
                     const maxInterest = calculateInterest(
+                      product.product_type,
                       amount,
                       product.max_rate,
                       product.period_months,
                     );
-                    const interestLabel = getInterestLabel(
-                      product.product_type,
-                    );
+                    const shouldShowInterest =
+                      product.product_type !== "loan" &&
+                      (baseInterest !== null || maxInterest !== null);
 
                     return (
                       <article
-                        className="rounded-lg border border-slate-200 p-4"
+                        className="rounded-lg border border-l-2 border-slate-200 border-l-emerald-600 p-4"
                         key={`${product.rank}-${product.product_name}`}
                       >
                         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -370,28 +368,29 @@ export default function Home() {
                           </div>
                         </dl>
 
-                        {baseInterest !== null || maxInterest !== null ? (
+                        {shouldShowInterest ? (
                           <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
                             <h4 className="font-semibold">
-                              참고용 이자 계산
+                              단순 예상 이자
                             </h4>
                             <div className="mt-2 space-y-1 text-slate-700">
                               {baseInterest !== null ? (
                                 <p>
-                                  {interestLabel}(기본금리 기준): 약{" "}
+                                  예상 이자 (기본금리 기준): 약{" "}
                                   {currencyFormatter.format(baseInterest)}원
                                 </p>
                               ) : null}
                               {maxInterest !== null ? (
                                 <p>
-                                  {interestLabel}(최고우대금리 기준): 약{" "}
-                                  {currencyFormatter.format(maxInterest)}원
+                                  예상 이자 (최고우대금리 기준): 약{" "}
+                                  {currencyFormatter.format(maxInterest)}원{" "}
+                                  *우대조건 충족 시
                                 </p>
                               ) : null}
                             </div>
                             <p className="mt-2 text-xs leading-5 text-slate-500">
-                              단순 참고용 계산이며{" "}
-                              {getInterestNotice(product.product_type)}
+                              단순 참고용 계산이며 세금, 복리, 우대조건 세부
+                              충족 여부는 반영하지 않습니다.
                             </p>
                           </div>
                         ) : null}
@@ -424,9 +423,11 @@ export default function Home() {
               )}
 
               {response.comparison_points.length > 0 ? (
-                <div className="rounded-md bg-slate-50 p-4">
-                  <h3 className="text-sm font-semibold">비교 포인트</h3>
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+                <div className="rounded-md bg-emerald-50 p-4">
+                  <h3 className="text-sm font-semibold text-emerald-950">
+                    비교 포인트
+                  </h3>
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-emerald-900">
                     {response.comparison_points.map((point) => (
                       <li key={point}>{point}</li>
                     ))}
@@ -434,7 +435,7 @@ export default function Home() {
                 </div>
               ) : null}
 
-              <p className="rounded-md border border-slate-200 px-4 py-3 text-xs leading-5 text-slate-500">
+              <p className="rounded-md border border-slate-200 px-4 py-3 text-xs leading-5 text-slate-600">
                 {response.disclaimer}
               </p>
             </div>
