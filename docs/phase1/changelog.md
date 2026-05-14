@@ -6,6 +6,114 @@
 - 개별 문서별 버전이 아니라, Phase 1 문서 세트의 변경 이력을 순차 기록한다.
 - 동일 날짜에 여러 문서를 수정하더라도 작업 단위가 다르면 버전을 분리할 수 있다.
 
+- 일부 버전은 작업 취소, 파일 미반영, 또는 후속 버전에 통합된 경우 생략될 수 있다.
+- 버전 번호가 일부 건너뛰어진 경우, 실제 반영된 변경 이력만 changelog에 기록한다.
+
+> 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
+
+## [v0.15] 2026-05-14
+
+### 변경 문서: ai-policy.md, changelog.md
+
+- 프롬프트 템플릿의 `preferred_institutions` 치환 기준을 화면 표시명 기준으로 명확화
+- `preferred_institutions` API 값과 프롬프트 표시값 매핑표 추가
+- `goal_mismatch_notice`가 없는 경우 `조건 불일치 가능성` 줄을 프롬프트에서 생략하는 기준 추가
+- 자연스러운 `product_type + financial_goal` 조합에서는 `해당 없음` 문구를 넣지 않는 기준 추가
+- 후속 구현 참고 사항에 프롬프트 변수 치환 기준 추가
+
+### 변경 사유
+
+- AI 프롬프트에 API enum 값이 그대로 들어가 AI 이해도가 낮아지는 문제를 방지하기 위함
+- 조건 불일치가 없는 정상 조합에서 불필요한 토큰 사용과 AI 응답 혼선을 줄이기 위함
+- 백엔드 프롬프트 생성 로직의 변수 치환 기준을 명확히 하기 위함
+
+### 영향 범위
+
+- docs/phase1/ai-policy.md
+- Phase 1 백엔드 OpenAI 프롬프트 구성
+- Phase 1 AI 응답 생성 품질
+
+## [v0.14] 2026-05-14
+
+### 변경 문서: ai-policy.md, changelog.md
+
+- AI 프롬프트 템플릿의 `candidates` 입력 형식을 텍스트 목록 기준으로 정의
+- 추천 후보 텍스트 예시 추가
+- 후보 텍스트에 포함할 항목과 값이 없는 경우의 처리 기준 추가
+- `saving_period_months` 미입력 시 `미입력` 표기 기준 추가
+- changelog 버전 관리 기준에 일부 버전 생략 가능 기준 추가
+- v0.4 누락 상태에 대한 참고 문구 추가
+
+### 변경 사유
+
+- 백엔드 구현 시 프롬프트의 `candidates` 구성 방식이 개발자마다 달라지는 것을 방지하기 위함
+- 선택 입력값인 `saving_period_months`의 프롬프트 처리 기준을 명확히 하기 위함
+- changelog에서 v0.4가 누락된 상태에 대한 혼선을 줄이기 위함
+
+### 영향 범위
+
+- docs/phase1/ai-policy.md
+- Phase 1 백엔드 OpenAI 프롬프트 구성
+- Phase 1 AI 응답 파싱 및 추천 후보 매핑 로직
+- docs/phase1/changelog.md
+
+## [v0.13] 2026-05-14
+
+### 변경 문서: ai-policy.md, changelog.md
+
+- AI 출력 데이터 기준에서 `product_reasons` 하위 필드 구조를 별도 정의
+- AI 출력 데이터 구조가 `data-definition.md` 12절과 일치해야 한다는 참조 기준 추가
+- AI 응답 내부 면책 문구 기준을 공식 정보 확인 안내 중심으로 명확화
+- Phase 1 기본 프롬프트 템플릿 추가
+- 프롬프트 변수(`financial_goal_context`, `goal_mismatch_notice`, `candidates`) 설명 추가
+- AI 출력 검증 기준 추가
+- AI 응답을 그대로 전달하지 않고 백엔드 검증 후 최종 응답에 결합하는 기준 추가
+
+### 변경 사유
+
+- AI 응답 JSON 구조와 필드 정의 간 불일치를 해소하기 위함
+- 백엔드 구현 시 프롬프트 작성 방식과 출력 검증 기준을 일관되게 적용하기 위함
+- AI 응답이 금융상품 가입 권유나 금융 자문으로 오해되지 않도록 면책 안내 기준을 명확히 하기 위함
+- `data-definition.md`와 `ai-policy.md` 간 AI 응답 데이터 구조 기준을 연결하기 위함
+
+### 영향 범위
+
+- docs/phase1/data-definition.md
+- docs/phase1/api-spec.md
+- Phase 1 백엔드 OpenAI 프롬프트 구성
+- Phase 1 AI 응답 파싱 및 검증 로직
+- Phase 1 추천 API 최종 응답 조립 로직
+
+## [v0.12] 2026-05-14
+
+### 변경 문서: ai-policy.md, changelog.md
+
+- Phase 1 AI 응답 정책 문서 초안 작성
+- AI의 역할과 하지 않는 일 정의
+- AI 입력 데이터와 출력 데이터 기준 정의
+- `financial_goal`별 프롬프트 컨텍스트 정의
+- `product_type + financial_goal` 조합별 응답 기준 정의
+- 불일치 조합 입력 시 오류 차단이 아닌 조건 확인 안내 기준 정의
+- 상품 유형별 AI 설명 기준 정의
+- 대출 상품 관련 제한 정책과 금지 표현 정의
+- 면책 문구 기준 정의
+- AI 응답 실패 및 `partial_success` 처리 기준 정의
+- 프롬프트 작성 기준과 후속 구현 참고 사항 정리
+
+### 변경 사유
+
+- 금융상품 추천 결과가 가입 권유나 금융 자문으로 오해되지 않도록 AI 응답 범위를 제한하기 위함
+- `api-spec.md`와 `data-definition.md`에서 정의한 데이터 구조를 AI 응답 정책과 연결하기 위함
+- 백엔드에서 OpenAI 프롬프트와 응답 파싱 로직을 구현하기 전 정책 기준을 명확히 하기 위함
+
+### 영향 범위
+
+- docs/phase1/api-spec.md
+- docs/phase1/data-definition.md
+- Phase 1 백엔드 OpenAI 프롬프트 구성
+- Phase 1 AI 응답 파싱 및 `partial_success` 처리
+- Phase 1 프론트엔드 추천 결과/유의사항 표시
+
 ## [v0.11] 2026-05-13
 
 ### 변경 문서: data-definition.md, changelog.md
