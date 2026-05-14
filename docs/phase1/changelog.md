@@ -11,6 +11,42 @@
 
 > 참고: v0.4는 실제 Repo 문서 이력에 반영되지 않았거나 후속 버전에 통합된 것으로 보고, 현재 changelog에는 기록하지 않는다. 이후 필요한 경우 실제 변경 파일과 커밋 기준으로 별도 복원한다.
 
+## [v0.16] 2026-05-14
+
+### 변경 문서: backend/phase1, shared, .env.example, .gitignore, changelog.md
+
+- Phase 1 백엔드 기본 폴더 구조 생성
+- FastAPI 앱 기본 진입점 생성
+- `/health` 엔드포인트 추가
+- 환경변수 로딩 기준 추가
+- `ALLOWED_ORIGINS` comma-separated 문자열을 리스트로 변환하는 기준 추가
+- API Key 미설정 시 앱 실행은 허용하되 경고 로그를 출력하는 기준 추가
+- APP_ENV와 ALLOWED_ORIGINS 기반 CORS 설정 기준 추가
+- Phase 1 백엔드 실행 README 작성
+- services, data, shared 폴더 역할 문서 작성
+- `.env.example`에 OpenAI 및 금융감독원 API 환경변수 기준 추가
+- `.gitignore`에 로컬 환경 및 빌드 산출물 제외 기준 확인
+
+### 변경 사유
+
+- 추천 API 구현 전 실행 가능한 최소 백엔드 구조를 마련하기 위함
+- Phase 1 구현 범위를 문서 기준에서 코드 구조로 전환하기 위함
+- 실제 외부 API 연동 전 mock 기반 개발을 진행할 수 있는 기반을 만들기 위함
+- Render 배포 시 CORS 설정을 환경별로 조정할 수 있도록 하기 위함
+- production CORS origin 설정에서 문자열/리스트 처리 오류를 방지하기 위함
+
+### 영향 범위
+
+- backend/phase1/app/main.py
+- backend/phase1/app/routes/health.py
+- backend/phase1/app/config.py
+- backend/phase1/app/schemas.py
+- backend/phase1/requirements.txt
+- shared/
+- .env.example
+- .gitignore
+- 후속 추천 API mock 구현
+
 ## [v0.15] 2026-05-14
 
 ### 변경 문서: ai-policy.md, changelog.md
