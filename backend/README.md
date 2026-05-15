@@ -154,3 +154,28 @@ FSS_API_KEY=발급받은_키
 - Phase 1에서는 이 한계를 허용하고, 필요 시 Phase 2 이후 Redis 등 외부 캐시 도입을 검토합니다.
 - 현재 FSS 실제 연동은 은행권 예금/적금 중심입니다.
 - 저축은행과 대출 실제 연동은 후속 작업입니다.
+## AI Provider 전환
+
+기본값은 mock입니다.
+
+```env
+AI_PROVIDER=mock
+```
+
+실제 OpenAI API를 사용하려면 서버 환경변수에 아래처럼 설정합니다.
+
+```env
+AI_PROVIDER=openai
+OPENAI_API_KEY=발급받은_키
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_TIMEOUT_SECONDS=20
+OPENAI_MAX_RETRIES=1
+```
+
+주의:
+
+- `AI_PROVIDER=openai`일 때만 실제 OpenAI API를 호출합니다.
+- `OPENAI_API_KEY`가 없거나 OpenAI 호출에 실패하면 추천 API는 `partial_success`로 응답합니다.
+- 상품 목록은 유지되지만 AI 추천 설명은 비어 있을 수 있습니다.
+- API Key는 `.env` 또는 Render 환경변수에만 설정하고 Git에 커밋하지 않습니다.
+- 프론트엔드에는 OpenAI API Key를 절대 설정하지 않습니다.

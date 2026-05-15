@@ -1,3 +1,18 @@
+## AI Provider 선택 기준
+
+Phase 1 추천 API는 환경변수 `AI_PROVIDER`로 AI 응답 생성 방식을 선택한다.
+
+| 값 | 설명 |
+|---|---|
+| `mock` | mock AI 응답 사용 |
+| `openai` | 실제 OpenAI API 호출 |
+
+기본값은 `mock`이다.
+
+`AI_PROVIDER=openai`일 때 `OPENAI_API_KEY`가 없거나 OpenAI 호출에 실패하면 추천 API는 `partial_success`를 반환한다.
+
+FSS 데이터 조회 실패는 `FINANCIAL_API_ERROR`이고, OpenAI 설명 생성 실패는 `partial_success`다.
+
 # api-spec.md
 
 # 금융 상품 비교 추천 AI 에이전트 API 명세

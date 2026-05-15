@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 from typing import Any
 
 from fastapi import HTTPException
@@ -82,6 +83,7 @@ def create_recommendation(request: RecommendationRequest) -> RecommendationRespo
         _merge_ai_reasons(recommended_products, ai_response.get("product_reasons") or [])
     except Exception:
         # AI mock 호출 실패 시 상품 후보는 유지하고 partial_success로 응답한다.
+        logging.warning("AI recommendation explanation failed. Returning partial_success.", exc_info=True)
         status = "partial_success"
         error = RecommendationError(
             error_code="OPENAI_API_ERROR",

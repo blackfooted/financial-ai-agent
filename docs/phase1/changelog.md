@@ -1,3 +1,38 @@
+## [v0.31] 2026-05-15
+
+### 변경 문서: openai_client.py, config.py, recommendation_service.py, requirements.txt, backend README, api-spec.md, ai-policy.md, changelog.md
+
+- `AI_PROVIDER` 환경변수 기반 mock/openai 모드 전환 기능 추가
+- 기본값을 `mock`으로 유지
+- 환경변수는 `shared/openai_client.py` 함수 호출 시점에 읽도록 구현
+- `AI_PROVIDER=openai`일 때 OpenAI Responses API 호출 경로 추가
+- OpenAI SDK 의존성 추가
+- OpenAI 호출 시 timeout과 max_retries 설정 반영
+- Phase 1에서는 프롬프트 기반 JSON 응답 요청 방식을 사용하고 `text.format`은 사용하지 않도록 결정
+- OpenAI 호출 실패 시 추천 API가 `partial_success`를 유지하도록 기준 확인
+- OpenAI 응답 JSON 검증 로직 추가
+- 실제 OpenAI 연동 시에도 추천 후보 설명 생성 역할로 제한
+- README와 API/AI 정책 문서에 AI Provider 전환 기준 반영
+
+### 변경 사유
+
+- 실제 OpenAI API 연동을 안전하게 도입하기 위함
+- 기본 mock 동작과 Render 배포 안정성을 유지하면서 openai 모드를 선택적으로 사용할 수 있도록 하기 위함
+- OpenAI 호출 실패가 추천 API 전체 실패로 이어지지 않도록 하기 위함
+- 환경변수 변경이 함수 호출 시점에 반영되도록 해 테스트 혼선을 줄이기 위함
+- 금융상품 가입 권유나 금융 자문으로 오해될 수 있는 AI 응답을 방지하기 위함
+
+### 영향 범위
+
+- shared/openai_client.py
+- backend/app/config.py
+- backend/app/services/recommendation_service.py
+- backend/requirements.txt
+- backend/README.md
+- docs/phase1/api-spec.md
+- docs/phase1/ai-policy.md
+- 후속 OpenAI 실제 호출 검증
+
 # changelog.md
 
 ## 버전 관리 기준
