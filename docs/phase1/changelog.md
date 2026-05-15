@@ -1,3 +1,36 @@
+## [v0.33] 2026-05-15
+
+### 변경 문서: usage_limiter.py, recommendation_service.py, frontend api, backend README, services README, api-spec.md, ai-policy.md, data-definition.md, changelog.md
+
+- `AI_PROVIDER=openai`일 때 추천 API 일일 호출 제한 추가
+- 제한 대상은 `POST /api/phase1/recommendations`로 한정
+- 전체 프론트엔드 화면 사용에는 제한을 적용하지 않도록 명시
+- `OPENAI_DAILY_LIMIT` 환경변수 추가
+- 파일 기반 일일 사용량 카운터 `usage_limiter.py` 추가
+- quota 초과 시 HTTP 429 `OPENAI_DAILY_LIMIT_EXCEEDED` 응답 추가
+- mock 모드에서는 호출 제한을 차감하지 않도록 처리
+- OpenAI 호출 실패 시에도 이미 차감된 count는 유지
+- 프론트엔드에서 429 메시지를 사용자에게 표시하도록 오류 처리 보완
+- 문서에 Phase 1 파일 기반 제한의 Render Free 티어 한계와 후속 확장 방향 기록
+
+### 변경 사유
+
+- 실제 OpenAI 호출 비용을 통제하기 위함
+- 공개 배포 환경에서 추천 버튼 반복 클릭으로 인한 과도한 API 호출을 방지하기 위함
+- 화면 전체가 아니라 실제 비용이 발생하는 추천 API에만 제한을 적용하기 위함
+- Phase 1에서는 DB 없이 최소 비용 방어 장치를 마련하고, 후속 단계에서 Redis/DB 기반 제한으로 확장하기 위함
+
+### 영향 범위
+
+- backend/app/services/usage_limiter.py
+- backend/app/services/recommendation_service.py
+- frontend/lib/api.ts
+- backend/app/data/usage/
+- docs/phase1/api-spec.md
+- docs/phase1/ai-policy.md
+- docs/phase1/data-definition.md
+- 후속 OpenAI 운영 정책
+
 ## [v0.32] 2026-05-15
 
 ### 변경 문서: README.md, deployment-plan.md, local-runbook.md, changelog.md

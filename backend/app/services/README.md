@@ -48,3 +48,20 @@ FSS API 기반 상품 데이터 조회와 캐시를 담당합니다.
 - 추천 API 기본 흐름은 아직 `sample_products.json` mock 데이터를 사용합니다.
 - `fss_client.py`는 단독 테스트와 후속 실제 연동 준비를 위한 모듈입니다.
 - 실제 OpenAI API 호출과 실제 금융감독원 API 호출을 추천 API 기본 흐름에 연결하지 않습니다.
+
+## usage_limiter.py
+
+OpenAI 실제 호출 모드에서 추천 API의 일일 호출 횟수를 제한합니다.
+
+현재 구현 범위:
+
+- `AI_PROVIDER=openai`일 때만 적용
+- `POST /api/phase1/recommendations` 추천 API 호출에만 적용
+- 파일 기반 일일 카운터 사용
+- 기본 제한값: `OPENAI_DAILY_LIMIT=10`
+- quota 초과 시 HTTP 429 반환
+
+주의:
+
+- Phase 1 파일 기반 카운터는 Render Free 티어 재시작 시 초기화될 수 있습니다.
+- 운영 수준에서는 Redis, DB, 외부 KV 저장소 기반 rate limit을 검토해야 합니다.

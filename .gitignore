@@ -10,3 +10,4 @@ dist/
 build/
 .DS_Store
 backend/app/data/cache/
+backend/app/data/usage/

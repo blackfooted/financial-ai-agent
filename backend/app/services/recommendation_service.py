@@ -1,5 +1,6 @@
 from datetime import datetime
 import logging
+import os
 from typing import Any
 
 from fastapi import HTTPException
@@ -11,9 +12,10 @@ from app.schemas import (
     RecommendationSource,
     RecommendedProduct,
 )
-from app.config import PRODUCT_DATA_SOURCE
+from app.config import OPENAI_DAILY_LIMIT, PRODUCT_DATA_SOURCE
 from app.services.fss_product_service import FssProductDataError, load_fss_products
 from app.services.product_loader import load_sample_products
+from app.services.usage_limiter import OpenAIDailyLimitExceededError, reserve_openai_daily_usage
 from shared.openai_client import generate_recommendation_explanation
 
 
@@ -72,6 +74,20 @@ def create_recommendation(request: RecommendationRequest) -> RecommendationRespo
     comparison_points: list[str] = []
     error = None
 
+    if _is_openai_provider_enabled():
+        try:
+            reserve_openai_daily_usage(limit=OPENAI_DAILY_LIMIT)
+        except OpenAIDailyLimitExceededError as exc:
+            raise HTTPException(
+                status_code=429,
+                detail={
+                    "status": "error",
+                    "error_code": "OPENAI_DAILY_LIMIT_EXCEEDED",
+                    "message": "오늘 AI 추천 가능 횟수를 초과했습니다. 내일 다시 시도해 주세요.",
+                    "details": [],
+                },
+            ) from exc
+
     try:
         ai_response = generate_recommendation_explanation(
             user_context=_build_user_context(request),
@@ -105,6 +121,10 @@ def create_recommendation(request: RecommendationRequest) -> RecommendationRespo
 
 def _filter_by_product_type(products: list[dict[str, Any]], product_type: str) -> list[dict[str, Any]]:
     return [product for product in products if product.get("product_type") == product_type]
+
+
+def _is_openai_provider_enabled() -> bool:
+    return os.getenv("AI_PROVIDER", "mock").lower() == "openai"
 
 
 def _load_products_for_source(request: RecommendationRequest) -> dict[str, Any]:

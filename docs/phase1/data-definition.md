@@ -439,3 +439,21 @@ AI 응답 파싱 실패 시 `summary`, `product_reasons`, `comparison_points`는
 
 금리와 기간은 이번 단계에서 매핑하지 않는다.
 `base_rate`, `max_rate`, `period_months`는 `None`으로 처리하며, 실제 응답 샘플 확인 후 `optionList` 기반으로 별도 보완한다.
+
+## OpenAI 일일 사용량 데이터 기준
+
+Phase 1에서는 OpenAI 실제 호출 횟수를 파일 기반으로 관리한다.
+
+| 항목 | 기준 |
+|---|---|
+| 저장 위치 | `backend/app/data/usage/openai_daily_usage.json` |
+| 저장 데이터 | 날짜, 호출 count |
+| 기본 제한값 | `OPENAI_DAILY_LIMIT=10` |
+| 사용자 식별자 저장 | 없음 |
+| 요청 본문 저장 | 없음 |
+| API Key 저장 | 금지 |
+| Git 커밋 | 금지 |
+
+주의:
+
+Render Free 티어에서는 인스턴스 재시작 시 파일이 초기화될 수 있다. Phase 1에서는 이를 허용하고, 운영 단계에서는 Redis 또는 DB 기반 제한을 검토한다.

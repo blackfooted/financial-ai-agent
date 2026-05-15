@@ -179,3 +179,20 @@ OPENAI_MAX_RETRIES=1
 - 상품 목록은 유지되지만 AI 추천 설명은 비어 있을 수 있습니다.
 - API Key는 `.env` 또는 Render 환경변수에만 설정하고 Git에 커밋하지 않습니다.
 - 프론트엔드에는 OpenAI API Key를 절대 설정하지 않습니다.
+
+### OpenAI 일일 호출 제한
+
+`AI_PROVIDER=openai`일 때 추천 API에는 일일 호출 제한이 적용됩니다.
+
+```env
+OPENAI_DAILY_LIMIT=10
+```
+
+기준:
+
+- 제한 대상: `POST /api/phase1/recommendations`
+- 제한 비대상: 프론트엔드 화면 접속, GNB 클릭, 입력값 변경, `/health`
+- `AI_PROVIDER=mock`에서는 제한을 차감하지 않음
+- quota 초과 시 HTTP 429 반환
+
+Phase 1에서는 파일 기반 카운터를 사용합니다. Render Free 티어에서는 인스턴스 재시작 시 카운터가 초기화될 수 있으므로, 운영 단계에서는 Redis 또는 DB 기반 제한을 검토합니다.

@@ -10,6 +10,14 @@ def _get_int_env(name: str, default: int) -> int:
         return default
 
 
+def _get_positive_int_env(name: str, default: int) -> int:
+    value = _get_int_env(name, default)
+    if value <= 0:
+        logging.warning("%s 값이 올바르지 않습니다. 기본값 %s로 처리합니다.", name, default)
+        return default
+    return value
+
+
 APP_ENV = os.getenv("APP_ENV", "local")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
@@ -17,6 +25,7 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_TIMEOUT_SECONDS = _get_int_env("OPENAI_TIMEOUT_SECONDS", 20)
 OPENAI_MAX_RETRIES = _get_int_env("OPENAI_MAX_RETRIES", 1)
+OPENAI_DAILY_LIMIT = _get_positive_int_env("OPENAI_DAILY_LIMIT", 10)
 FSS_API_KEY = os.getenv("FSS_API_KEY")
 
 _raw_ai_provider = os.getenv("AI_PROVIDER", "mock").lower()

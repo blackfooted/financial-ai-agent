@@ -504,3 +504,21 @@ FSS API 호출은 성공했으나 캐시 저장에 실패한 경우에는 경고
 `source.provider`는 `sample` 또는 `fss`로 표시한다.
 `source.cache_used`는 캐시 사용 여부를 표시한다.
 `source.fetched_at`은 sample meta 시점, FSS API 호출 시점, 또는 FSS 캐시 저장 시점을 표시한다.
+
+## OpenAI 호출 제한 기준
+
+`AI_PROVIDER=openai`일 때만 추천 API에 일일 호출 제한을 적용한다.
+
+- 제한 대상: `POST /api/phase1/recommendations`
+- 제한 비대상: 프론트엔드 화면 접속, GNB 클릭, 입력값 변경, `/health`
+- 기본 제한값: `OPENAI_DAILY_LIMIT=10`
+- `AI_PROVIDER=mock`에서는 제한을 차감하지 않는다.
+- OpenAI 호출 시도 직전에 count를 차감한다.
+- OpenAI 호출 실패로 `partial_success`가 되더라도 count는 유지한다.
+- quota 초과 시 OpenAI 호출 전 HTTP 429를 반환한다.
+
+### 429 오류 응답
+
+| HTTP Status | error_code | 설명 | 사용자 메시지 |
+|---|---|---|---|
+| 429 | `OPENAI_DAILY_LIMIT_EXCEEDED` | 일일 OpenAI 추천 호출 제한 초과 | 오늘 AI 추천 가능 횟수를 초과했습니다. 내일 다시 시도해 주세요. |

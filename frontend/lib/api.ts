@@ -52,6 +52,13 @@ export async function requestRecommendation(
 
     const body = await response.json().catch(() => null);
     if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error(
+          extractErrorMessage(body) ||
+            "오늘 AI 추천 가능 횟수를 초과했습니다. 내일 다시 시도해 주세요.",
+        );
+      }
+
       throw new Error(
         extractErrorMessage(body) ||
           "추천 API 요청을 처리하지 못했습니다. 입력 조건을 확인해 주세요.",
