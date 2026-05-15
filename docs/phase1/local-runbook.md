@@ -299,3 +299,17 @@ curl -X POST http://127.0.0.1:8000/api/phase1/recommendations \
 4. npm audit 취약점 검토
 5. 실제 금융감독원 API 연동 준비
 6. 실제 OpenAI API 연동 준비
+
+## Render 배포 후 CORS 확인 보완
+
+| 상황 | 확인 방법 | 대응 |
+| --- | --- | --- |
+| Render 배포 후 추천 API 연결 실패 | 브라우저 Network 탭에서 Request URL과 CORS 오류 확인 | Frontend `NEXT_PUBLIC_API_BASE_URL`, Backend `ALLOWED_ORIGINS` 값 확인 |
+| Backend 기본 URL이 `{"detail":"Not Found"}` 표시 | `/health` 경로로 접속 | `/`는 라우트가 없으므로 `/health`로 정상 여부 확인 |
+
+Render 배포 환경에서는 프론트엔드와 백엔드 URL이 서로 다르므로 CORS 설정이 필요하다.
+
+- Frontend `NEXT_PUBLIC_API_BASE_URL`: Backend Render URL
+- Backend `ALLOWED_ORIGINS`: Frontend Render URL
+
+두 값을 서로 반대로 입력하지 않도록 주의한다.

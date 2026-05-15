@@ -1,3 +1,29 @@
+## [v0.32] 2026-05-15
+
+### 변경 문서: README.md, deployment-plan.md, local-runbook.md, changelog.md
+
+- Render 배포 완료 상태 문서화
+- 백엔드 `/health` 정상 응답 확인 결과 기록
+- 프론트엔드 추천 API 호출 정상 동작 확인 결과 기록
+- Render 환경변수 기준 정리
+- CORS 오류 원인과 해결 이력 기록
+- Backend 기본 URL `/`의 `Not Found` 응답과 `/health` 확인 기준 구분
+- local-runbook.md에 Render 배포 후 CORS 확인 항목 추가
+
+### 변경 사유
+
+- Render 배포 후 실제 동작 상태와 설정 기준을 문서에 남기기 위함
+- 프론트엔드-백엔드 연결 실패 원인이 CORS 설정 오류였음을 기록하기 위함
+- 이후 배포 또는 재배포 시 동일한 환경변수 설정 오류를 줄이기 위함
+
+### 영향 범위
+
+- README.md
+- docs/phase1/deployment-plan.md
+- docs/phase1/local-runbook.md
+- 후속 Render 재배포 작업
+- 후속 실제 OpenAI 연동 검증
+
 ## [v0.31] 2026-05-15
 
 ### 변경 문서: openai_client.py, config.py, recommendation_service.py, requirements.txt, backend README, api-spec.md, ai-policy.md, changelog.md

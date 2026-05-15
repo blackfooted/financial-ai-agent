@@ -187,3 +187,64 @@ POST /api/phase4/...
 | Render Free 티어 슬립 모드 | 비활성 상태 후 첫 요청이 느릴 수 있음 | 시연 전 사전 접속. 필요 시 UptimeRobot 등 핑 서비스 검토. 단, 무료 플랜 정책은 배포 시점에 확인 |
 | 프론트엔드 start script 누락 가능성 | `package.json`에 `start` script가 없으면 Render Start Command 실패 가능 | 배포 전 `"start": "next start"` 존재 여부 확인 |
 | CORS 설정 순서 | 백엔드 URL과 프론트엔드 URL이 서로 필요함 | 백엔드 선배포 → 프론트 배포 → 백엔드 `ALLOWED_ORIGINS` 업데이트 순서 권장 |
+
+## 배포 결과 기록
+
+### Render 배포 상태
+
+| 항목 | 상태 |
+|---|---|
+| 백엔드 배포 | 완료 |
+| 프론트엔드 배포 | 완료 |
+| 백엔드 `/health` | 정상 |
+| 프론트엔드 화면 접속 | 정상 |
+| 추천 API 호출 | 정상 |
+| CORS 오류 | 발생 후 해결 |
+| 실제 OpenAI 호출 | 기본 비활성 |
+| 실제 FSS 데이터 사용 | 가능 |
+
+### 현재 Render 환경변수 기준
+
+#### Backend
+
+| 환경변수 | 설정 기준 |
+|---|---|
+| `APP_ENV` | `production` |
+| `PRODUCT_DATA_SOURCE` | `fss` |
+| `AI_PROVIDER` | `mock` |
+| `FSS_API_KEY` | Render backend 환경변수로 설정 |
+| `OPENAI_API_KEY` | 실제 OpenAI 사용 시에만 설정 |
+| `ALLOWED_ORIGINS` | Frontend Render URL |
+
+#### Frontend
+
+| 환경변수 | 설정 기준 |
+|---|---|
+| `NEXT_PUBLIC_API_BASE_URL` | Backend Render URL |
+
+### CORS 오류 및 해결 이력
+
+초기 배포 후 프론트엔드에서 추천 API 호출 시 아래 메시지가 표시되었습니다.
+
+```text
+추천 API에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해 주세요.
+```
+
+원인:
+
+Backend Render 환경변수 `ALLOWED_ORIGINS`에 등록된 Frontend URL이 잘못되어 CORS 요청이 차단됨
+
+해결:
+
+Backend Render 환경변수 `ALLOWED_ORIGINS`를 실제 Frontend Render URL로 수정한 뒤 백엔드를 재배포
+
+결과:
+
+프론트엔드에서 추천 API 호출 정상 동작 확인
+
+### 배포 후 확인된 기준
+
+- 백엔드 기본 URL `/`은 별도 라우트가 없으므로 `{"detail":"Not Found"}`가 표시될 수 있다.
+- 백엔드 정상 여부는 `/health`로 확인한다.
+- 프론트엔드 추천 API 호출 실패 시 우선 `NEXT_PUBLIC_API_BASE_URL`과 `ALLOWED_ORIGINS`를 확인한다.
+- `NEXT_PUBLIC_API_BASE_URL` 변경 후에는 프론트엔드 재배포가 필요하다.

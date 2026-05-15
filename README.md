@@ -100,3 +100,24 @@ npm run dev
 ```
 
 자세한 로컬 실행 및 검증 방법은 `docs/phase1/local-runbook.md`를 참고합니다.
+
+## 배포 상태
+
+Phase 1 mock/FSS 기반 MVP는 Render에 배포되었습니다.
+
+- Frontend: `<프론트엔드 Render URL 입력 예정>`
+- Backend: `<백엔드 Render URL 입력 예정>`
+- Backend Health Check: `/health`
+- 추천 API: `POST /api/phase1/recommendations`
+
+현재 배포 상태:
+
+- 상품 데이터: 금융감독원 API 기반 FSS 데이터 사용 가능
+- AI 응답: 기본 mock 모드 유지
+- 실제 OpenAI 호출: 선택적으로만 사용
+- 로그인/히스토리/관리자 기능: 미구현
+
+주의:
+
+- 실제 API Key는 Render 환경변수로만 관리합니다.
+- 프론트엔드에는 OpenAI API Key 또는 FSS API Key를 설정하지 않습니다.
