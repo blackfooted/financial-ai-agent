@@ -535,6 +535,28 @@ export default function Phase2Page() {
     };
   }, [transactions]);
 
+  const reviewNeededSummary = useMemo(() => {
+    const reviewNeededTransactions = transactions.filter((transaction) =>
+      ["미확인", "검토중"].includes(transaction.review_status),
+    );
+    const unreviewedCount = getStatusCount(reviewNeededTransactions, "미확인");
+    const inReviewCount = getStatusCount(reviewNeededTransactions, "검토중");
+    const highCount = getRiskCount(reviewNeededTransactions, "high");
+    const mediumCount = getRiskCount(reviewNeededTransactions, "medium");
+    const lowCount = getRiskCount(reviewNeededTransactions, "low");
+
+    return {
+      reviewNeededCount: reviewNeededTransactions.length,
+      unreviewedCount,
+      inReviewCount,
+      risk: {
+        high: highCount,
+        medium: mediumCount,
+        low: lowCount,
+      },
+    };
+  }, [transactions]);
+
   const analyzeSummaryContent = useMemo(() => {
     if (!analyzeSummary) {
       return (
@@ -562,29 +584,45 @@ export default function Phase2Page() {
             </p>
           </div>
           <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-xs text-slate-500">의심 후보 건수</p>
+            <p className="text-xs text-slate-500">검토 필요 후보 건수</p>
             <p className="mt-1 text-lg font-semibold">
-              {analyzeSummary.detected_count}
+              {reviewNeededSummary.reviewNeededCount}
             </p>
           </div>
-          {(["low", "medium", "high"] as RiskLevel[]).map((level) => (
+          <div className="rounded-md border border-slate-200 bg-white px-4 py-3">
+            <p className="text-xs text-slate-500">미확인 후보</p>
+            <p className="mt-1 text-lg font-semibold">
+              {reviewNeededSummary.unreviewedCount}
+            </p>
+          </div>
+          <div className="rounded-md border border-slate-200 bg-white px-4 py-3">
+            <p className="text-xs text-slate-500">검토중 후보</p>
+            <p className="mt-1 text-lg font-semibold">
+              {reviewNeededSummary.inReviewCount}
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {(["high", "medium", "low"] as RiskLevel[]).map((level) => (
             <div
               className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-4 py-3"
               key={level}
             >
               <RiskBadge riskLevel={level} />
               <span className="text-lg font-semibold">
-                {analyzeSummary.risk_summary[level] ?? 0}
+                {reviewNeededSummary.risk[level] ?? 0}
               </span>
             </div>
           ))}
         </div>
         <p className="text-xs text-slate-500">
-          위험도별 의심 후보는 룰 기반 탐지 결과의 분포를 나타냅니다.
+          위험도별 검토 필요 후보는 미확인 및 검토중 상태의 거래를
+          기준으로 계산됩니다. 탐지 결과 중 정상거래 또는 의심거래로 최종
+          처리된 건은 검토 필요 후보에서 제외됩니다.
         </p>
       </div>
     );
-  }, [analyzeSummary]);
+  }, [analyzeSummary, reviewNeededSummary]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
@@ -614,7 +652,7 @@ export default function Phase2Page() {
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
             샘플 거래 데이터를 기반으로 의심 패턴을 탐지하고 담당자 검토
-            의심거래 검토 리포트 초안을 확인하는 화면입니다.
+            리포트 초안을 확인하는 화면입니다.
           </p>
         </section>
 
@@ -626,7 +664,8 @@ export default function Phase2Page() {
               </h2>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
                 샘플 거래내역에 탐지 룰을 적용해 의심거래 후보를
-                갱신합니다.
+                갱신합니다. 최종 처리된 정상거래와 의심거래는 검토 필요
+                후보에서 제외됩니다.
               </p>
             </div>
             <button
@@ -658,7 +697,8 @@ export default function Phase2Page() {
               </h2>
               <p className="text-sm text-slate-500">
                 현재 조회 조건에 해당하는 거래의 담당자 처리 현황과
-                위험도 분포를 보여줍니다.
+                위험도 분포를 보여줍니다. 최종 처리된 정상거래와
+                의심거래도 포함됩니다.
               </p>
             </div>
             <button
