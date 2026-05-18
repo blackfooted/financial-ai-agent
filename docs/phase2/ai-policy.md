@@ -2,7 +2,15 @@
 
 ## 문서 목적
 
-이 문서는 Phase 2 FDS 의심거래 탐지 화면에서 사용하는 AI 리포트 초안의 역할, mock/openai 모드 기준, 비용 방어, 민감정보 관리, 담당자 검토 원칙을 정의한다. Step 5 범위에서는 실제 OpenAI API를 호출하지 않고 mock 리포트 품질과 검토 흐름만 개선한다.
+이 문서는 Phase 2 FDS 의심거래 탐지 화면에서 사용하는 AI 리포트 초안의 역할, mock/openai 모드 기준, 비용 방어, 민감정보 관리, 담당자 검토 원칙을 정의한다. Step 6 범위에서는 실제 OpenAI API를 호출하지 않고 비용 방어 기준과 Render 배포 검증 기준을 명확히 한다.
+
+## Phase 2 AI Provider 정책
+
+- 기본 조합은 `PHASE2_DATA_SOURCE=sample`, `PHASE2_AI_PROVIDER=mock`, `PHASE2_DAILY_LIMIT=10`이다.
+- `PHASE2_AI_PROVIDER`가 없거나 `mock`이면 외부 API 호출 없이 mock 리포트를 반환한다.
+- `PHASE2_AI_PROVIDER=openai`가 설정되어도 Step 6에서는 실제 OpenAI 호출이 활성화되어 있지 않다.
+- openai 모드가 요청된 경우에도 현재 구현은 외부 호출 없이 mock 리포트를 반환하고, 응답에 openai 미활성화 안내를 포함한다.
+- openai 실제 호출 도입은 별도 사용자 승인, 비용 제한 구현, 입력 최소화 검토 후 별도 단계에서 수행한다.
 
 ## AI 리포트 역할
 
@@ -25,6 +33,7 @@
 - openai 모드 전환 전에는 입력 필드 최소화, 비용 제한, 오류 처리, 로그 정책을 먼저 검토한다.
 - openai 모드에서도 AI는 거래 차단이나 최종 상태 변경을 자동 수행하지 않는다.
 - API 응답은 담당자 검토용 초안으로만 사용한다.
+- openai 모드 전환 전에는 `PHASE2_DAILY_LIMIT` 차감 시점, 재시도 정책, 장애 시 fallback 기준을 문서와 코드에 함께 반영한다.
 
 ## 비용 방어 기준
 
@@ -32,12 +41,21 @@
 - 동일 거래에 대한 반복 호출을 줄이기 위해 캐시 또는 재사용 전략을 검토한다.
 - 리포트 생성에는 필요한 최소 거래 정보와 탐지 결과만 전달한다.
 - 실패한 호출을 무한 재시도하지 않는다.
+- `PHASE2_DAILY_LIMIT` 기본값은 10이다.
+- `PHASE2_DAILY_LIMIT`는 Phase 2 리포트 생성의 openai 실제 호출 직전에만 차감한다.
+- mock 모드에서는 사용량 파일, 카운터, 차감 이력을 만들지 않는다.
+- openai 호출이 미활성화된 현재 단계에서는 카운터를 차감하지 않는다.
+- 향후 openai 호출 실패 시에도 비용 발생 가능성이 있으므로 “호출 시도 직전 차감” 기준을 우선 적용한다.
+- Phase 1의 `OPENAI_DAILY_LIMIT`와 Phase 2의 `PHASE2_DAILY_LIMIT`는 서로 다른 환경변수이며 의미를 섞지 않는다.
+- Phase 2 비용 제한 로직은 Phase 1 제한 로직과 저장소에 영향을 주지 않는다.
 
 ## 민감정보/API Key 관리 원칙
 
 - API Key는 프론트엔드에 노출하지 않는다.
 - API Key는 코드나 문서에 하드코딩하지 않는다.
 - `.env`, `.env.local`, `.env.example` 변경은 별도 승인 없이는 수행하지 않는다.
+- Render 환경변수에는 실제 API Key를 서비스 설정 화면에서만 등록하며 문서, 코드, 빌드 로그에 남기지 않는다.
+- Step 6 Render 배포 기준에서는 `PHASE2_AI_PROVIDER=mock`을 유지하므로 실제 API Key 등록이 필요하지 않다.
 - 리포트에는 실제 개인정보나 금융거래 민감정보를 포함하지 않는다.
 - 샘플 데이터는 가명 ID, 문서용 IP, 가상 기기 ID만 사용한다.
 - 로그에는 API Key, Secret, 실제 고객 식별 정보, 계좌번호 원문을 출력하지 않는다.

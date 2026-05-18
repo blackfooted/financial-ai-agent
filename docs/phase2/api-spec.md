@@ -25,8 +25,17 @@
 | 환경변수 | 기본값 | 허용값 | 설명 |
 |---|---|---|---|
 | PHASE2_DATA_SOURCE | sample | sample, real | Phase 2 거래 데이터 소스를 결정한다. |
-| PHASE2_AI_PROVIDER | mock | mock, openai | AI 리포트 생성 방식을 결정한다. mock이 기본값이다. |
-| PHASE2_DAILY_LIMIT | 10 | positive integer | openai 모드에서 하루 최대 AI 호출 횟수를 제한한다. |
+| PHASE2_AI_PROVIDER | mock | mock, openai | AI 리포트 생성 방식을 결정한다. mock이 기본값이며 Step 6에서는 openai 실제 호출이 미활성화되어 있다. |
+| PHASE2_DAILY_LIMIT | 10 | positive integer | 향후 openai 실제 호출 직전 비용 방어 기준으로 사용할 하루 최대 호출 횟수이다. |
+
+### Phase 2 Provider 제한 기준
+
+- `PHASE2_AI_PROVIDER`가 없거나 `mock`이면 mock 리포트를 반환한다.
+- `PHASE2_AI_PROVIDER=openai`가 설정되어도 현재 단계에서는 실제 OpenAI 호출을 수행하지 않는다.
+- openai 실제 호출은 후속 단계에서 사용자 명시 승인 후 별도 구현한다.
+- mock 모드에서는 외부 API 호출이 없고 `PHASE2_DAILY_LIMIT` 사용량을 차감하지 않는다.
+- openai 실제 호출이 미활성화된 현재 단계에서도 사용량 카운터를 차감하지 않는다.
+- Phase 1의 `OPENAI_DAILY_LIMIT`와 Phase 2의 `PHASE2_DAILY_LIMIT`는 서로 독립적으로 관리한다.
 
 ## 공통 응답 원칙
 
@@ -66,6 +75,7 @@
 | PHASE2_INVALID_STATUS | 허용되지 않는 review_status 값이 전달된 경우 |
 | PHASE2_REPORT_NOT_READY | 리포트 생성 전 조회를 시도한 경우 |
 | PHASE2_INVALID_DATA_SOURCE | 현재 지원하지 않는 data_source 값이 전달된 경우 |
+| PHASE2_OPENAI_NOT_ENABLED | openai 모드가 요청되었으나 현재 단계에서 실제 OpenAI 호출이 활성화되지 않은 경우 |
 
 ## API 목록
 
@@ -257,6 +267,8 @@ GET /api/phase2/transactions/tx-row-001/report
   "data": {
     "transaction_id": "TX202605180001",
     "provider": "mock",
+    "provider_requested": "mock",
+    "provider_notice": "mock 모드로 외부 API 호출 없이 리포트를 생성했습니다.",
     "report_title": "의심거래 검토 리포트 초안",
     "risk_level": "high",
     "risk_label": "상",
@@ -266,6 +278,13 @@ GET /api/phase2/transactions/tx-row-001/report
       "최근 동일 고객의 거래 금액 패턴과 비교가 필요합니다.",
       "신규 기기 등록 또는 본인 사용 여부 확인이 필요합니다.",
       "거래 발생 위치와 직전 거래 위치의 정합성 확인이 필요합니다."
+    ],
+    "risk_factors": [],
+    "recommended_actions": [],
+    "customer_context_questions": [],
+    "evidence_summary": {},
+    "limitations": [
+      "mock 리포트는 샘플 데이터와 룰 기반 탐지 결과만 사용하며 외부 API를 호출하지 않습니다."
     ],
     "disclaimer": "본 리포트는 담당자 검토를 위한 초안이며, 최종 판단은 담당자가 수행합니다."
   },
@@ -277,6 +296,7 @@ GET /api/phase2/transactions/tx-row-001/report
 
 - `PHASE2_AI_PROVIDER=mock`이 기본값이다.
 - mock 모드에서는 외부 API를 호출하지 않는다.
+- mock 모드에서는 사용량 파일 또는 카운터를 만들거나 차감하지 않는다.
 - mock 리포트는 탐지 룰, 위험도, 거래 요약을 기반으로 정해진 템플릿 형태로 생성한다.
 - mock 모드는 개발, 포트폴리오 시연, 비용 없는 기능 검증을 위한 기본 경로로 사용한다.
 
@@ -284,6 +304,8 @@ GET /api/phase2/transactions/tx-row-001/report
 
 - 실제 OpenAI 호출은 사용자의 명시적 승인 후에만 수행한다.
 - `PHASE2_DAILY_LIMIT=10` 기준으로 일일 호출 횟수를 제한한다.
+- `PHASE2_DAILY_LIMIT`는 실제 OpenAI 호출 직전에만 차감한다.
+- 현재 Step 6에서는 openai 모드가 요청되어도 실제 호출이 미활성화되어 있으므로 차감하지 않는다.
 - 리포트 생성에 필요한 최소 거래 필드와 탐지 결과만 AI 입력으로 전달한다.
 - API Key는 서버 환경변수로만 관리하며, 프론트엔드 응답 또는 문서 예시에 포함하지 않는다.
 - 실패 시 동일 요청을 무제한 재시도하지 않고, 담당자가 재요청 여부를 판단할 수 있도록 에러를 반환한다.

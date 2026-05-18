@@ -1,5 +1,36 @@
 # Phase 2 Changelog
 
+## [v0.6] 2026-05-18
+
+### 변경 문서: docs/phase2/ai-policy.md
+- Phase 2 AI Provider 정책과 비용 방어 기준을 보강했다.
+- `PHASE2_DAILY_LIMIT` 기준과 mock/openai 모드 분리 원칙을 정리했다.
+- Phase 1 `OPENAI_DAILY_LIMIT`와 Phase 2 `PHASE2_DAILY_LIMIT`를 분리해 관리하는 기준을 명시했다.
+
+### 변경 문서: docs/phase2/api-spec.md
+- openai 모드 실제 호출 미활성화 기준을 명시했다.
+- mock 모드에서는 외부 API 호출과 사용량 차감이 없음을 명시했다.
+- `PHASE2_OPENAI_NOT_ENABLED` 에러 코드를 추가했다.
+
+### 변경 문서: docs/phase2/render-deploy-checklist.md
+- Render Free 티어 기준 배포 전/후 점검 항목을 신규 작성했다.
+- 환경변수, API 검증, Phase 1 보호 기준, 배포 오류 기록 형식을 정리했다.
+
+### 변경 코드: backend/app/services/phase2/report_service.py
+- openai 모드가 설정되어도 실제 외부 호출 없이 mock 리포트를 반환한다는 안내 필드를 보강했다.
+- mock/openai 미활성화 상태에서는 사용량 카운터를 차감하지 않는 한계 문구를 추가했다.
+
+### 변경 코드: backend/app/routes/phase2_transactions.py
+- 코드 변경 없음.
+
+### 변경 사유
+- 실제 OpenAI 호출 전 비용 발생 가능성을 차단하고, Render 배포 시 환경변수와 mock 동작을 안정적으로 검증하기 위함이다.
+
+### 영향 범위
+- 영향 문서: ai-policy.md, api-spec.md, render-deploy-checklist.md, changelog.md
+- 영향 기능: Phase 2 mock/openai 모드 방어, 배포 검증 기준
+- 코드 영향: Phase 2 report service의 openai 미활성화 안내 처리
+
 ## [v0.5] 2026-05-18
 
 ### 변경 코드: backend/app/services/phase2/report_service.py

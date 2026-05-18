@@ -111,10 +111,10 @@ RULE_TEMPLATES = {
 
 
 def create_mock_report(transaction: dict, detection: dict) -> dict:
-    provider = os.getenv("PHASE2_AI_PROVIDER", "mock").lower()
-    # Phase 2에서는 openai 설정이어도 실제 외부 API를 호출하지 않고 mock 리포트를 반환한다.
-    if provider != "mock":
-        provider = "mock"
+    requested_provider = os.getenv("PHASE2_AI_PROVIDER", "mock").lower()
+    # Step 6 기준: openai 설정이어도 실제 외부 API를 호출하지 않고 mock 리포트를 반환한다.
+    provider = "mock"
+    provider_notice = _build_provider_notice(requested_provider)
 
     detected_rules = detection["detected_rules"]
     risk_level = detection["risk_level"]
@@ -125,12 +125,14 @@ def create_mock_report(transaction: dict, detection: dict) -> dict:
     review_points = _build_review_points(detected_rules)
     recommended_actions = _build_recommended_actions(detected_rules, risk_level)
     customer_context_questions = _build_customer_context_questions(detected_rules)
-    limitations = _build_limitations()
+    limitations = _build_limitations(requested_provider)
     summary = _build_summary(detection, tone, risk_label)
 
     return {
         "transaction_id": transaction["transaction_id"],
         "provider": provider,
+        "provider_requested": requested_provider,
+        "provider_notice": provider_notice,
         "report_title": "의심거래 검토 리포트 초안",
         "risk_level": risk_level,
         "risk_label": risk_label,
@@ -251,14 +253,30 @@ def _build_customer_context_questions(detected_rules: list[str]) -> list[str]:
             questions.extend(template["questions"])
     return _unique(questions)
 
+def _build_provider_notice(requested_provider: str) -> str:
+    if requested_provider == "openai":
+        return (
+            "PHASE2_AI_PROVIDER=openai가 설정되어 있어도 Step 6에서는 실제 OpenAI 호출이 "
+            "활성화되어 있지 않아 mock 리포트를 반환합니다."
+        )
+    if requested_provider != "mock":
+        return "허용되지 않은 provider 값이므로 외부 호출 없이 mock 리포트를 반환합니다."
+    return "mock 모드로 외부 API 호출 없이 리포트를 생성했습니다."
 
-def _build_limitations() -> list[str]:
-    return [
+
+def _build_limitations(requested_provider: str) -> list[str]:
+    limitations = [
         "mock 리포트는 샘플 데이터와 룰 기반 탐지 결과만 사용하며 외부 API를 호출하지 않습니다.",
         "리포트는 거래 차단, 정상거래 확정, 의심거래 확정을 자동 수행하지 않습니다.",
         "실제 개인정보나 금융거래 민감정보 없이 포트폴리오 검증용 샘플 값을 기준으로 작성됩니다.",
         "최종 판단과 후속 조치는 담당자가 내부 기준에 따라 수행해야 합니다.",
     ]
+    if requested_provider == "openai":
+        limitations.insert(
+            1,
+            "openai 모드는 현재 단계에서 실제 호출이 미활성화되어 있으며 사용량 카운터를 차감하지 않습니다.",
+        )
+    return limitations
 
 
 def _unique(items: list[str]) -> list[str]:
