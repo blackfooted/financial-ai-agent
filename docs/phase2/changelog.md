@@ -1,5 +1,26 @@
 # Phase 2 Changelog
 
+## [v0.7] 2026-05-18
+
+### 변경 문서: README.md
+- Phase 2 프로젝트 개요, 실행 방법, API 검증 명령, 환경변수 기준, Render 배포 주의사항을 보강했다.
+- 포트폴리오 관점에서 FDS 의심거래 탐지와 Human-in-the-loop 구조를 설명했다.
+
+### 변경 문서: docs/phase2/retrospective.md
+- Phase 2 회고 문서를 신규 작성했다.
+- 잘된 점, 아쉬운 점, 다음 Phase 반영사항을 정리했다.
+
+### 변경 문서: docs/phase2/changelog.md
+- Phase 2 Step 7 문서 정리 이력을 v0.7로 기록했다.
+
+### 변경 사유
+- Phase 2 완료 시점에서 실행/검증 방법과 포트폴리오 설명력을 보강하고, 다음 Phase에 반영할 개선사항을 정리하기 위함이다.
+
+### 영향 범위
+- 영향 문서: README.md, retrospective.md, changelog.md
+- 영향 기능: 없음
+- 코드 영향: 없음
+
 ## [v0.6] 2026-05-18
 
 ### 변경 문서: docs/phase2/ai-policy.md
