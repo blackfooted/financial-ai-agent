@@ -67,6 +67,7 @@ type TransactionDetail = {
 
 type RiskFilter = "all" | RiskLevel;
 type ReviewStatusFilter = "전체" | "미확인" | "검토중" | "정상거래" | "의심거래";
+type DateFilter = string;
 
 const riskFilterOptions: Array<{ label: string; value: RiskFilter }> = [
   { label: "전체", value: "all" },
@@ -137,6 +138,61 @@ function buildTransactionQuery(
   return query ? `/api/phase2/transactions?${query}` : "/api/phase2/transactions";
 }
 
+function isWithinDateRange(
+  transactionTime: string,
+  startDate: DateFilter,
+  endDate: DateFilter,
+) {
+  const transactionDate = new Date(transactionTime);
+  if (Number.isNaN(transactionDate.getTime())) {
+    return true;
+  }
+
+  if (startDate) {
+    const start = new Date(`${startDate}T00:00:00`);
+    if (transactionDate < start) {
+      return false;
+    }
+  }
+
+  if (endDate) {
+    const end = new Date(`${endDate}T23:59:59.999`);
+    if (transactionDate > end) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function filterTransactionsByDate(
+  items: TransactionListItem[],
+  startDate: DateFilter,
+  endDate: DateFilter,
+) {
+  if (!startDate && !endDate) {
+    return items;
+  }
+
+  return items.filter((transaction) =>
+    isWithinDateRange(transaction.transaction_time, startDate, endDate),
+  );
+}
+
+function isInvalidDateRange(startDate: DateFilter, endDate: DateFilter) {
+  return Boolean(startDate && endDate && startDate > endDate);
+}
+
+function getStatusCount(items: TransactionListItem[], status: string) {
+  return items.filter((transaction) => transaction.review_status === status)
+    .length;
+}
+
+function getRiskCount(items: TransactionListItem[], riskLevel: RiskLevel) {
+  return items.filter((transaction) => transaction.risk_level === riskLevel)
+    .length;
+}
+
 export default function Phase2Page() {
   const [transactions, setTransactions] = useState<TransactionListItem[]>([]);
   const [selectedTransactionId, setSelectedTransactionId] = useState<
@@ -152,10 +208,14 @@ export default function Phase2Page() {
     useState<RiskFilter>("all");
   const [draftReviewStatusFilter, setDraftReviewStatusFilter] =
     useState<ReviewStatusFilter>("전체");
+  const [draftStartDate, setDraftStartDate] = useState<DateFilter>("");
+  const [draftEndDate, setDraftEndDate] = useState<DateFilter>("");
   const [appliedRiskLevelFilter, setAppliedRiskLevelFilter] =
     useState<RiskFilter>("all");
   const [appliedReviewStatusFilter, setAppliedReviewStatusFilter] =
     useState<ReviewStatusFilter>("전체");
+  const [appliedStartDate, setAppliedStartDate] = useState<DateFilter>("");
+  const [appliedEndDate, setAppliedEndDate] = useState<DateFilter>("");
   const [isListLoading, setIsListLoading] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [isReportLoading, setIsReportLoading] = useState(false);
@@ -168,6 +228,7 @@ export default function Phase2Page() {
     null,
   );
   const [pageMessage, setPageMessage] = useState<string | null>(null);
+  const [filterMessage, setFilterMessage] = useState<string | null>(null);
   const [pendingNavMessage, setPendingNavMessage] = useState<string | null>(
     null,
   );
@@ -175,6 +236,8 @@ export default function Phase2Page() {
   const loadTransactions = useCallback(async (
     riskFilter: RiskFilter,
     statusFilter: ReviewStatusFilter,
+    startDate: DateFilter,
+    endDate: DateFilter,
   ) => {
     setIsListLoading(true);
     setListErrorMessage(null);
@@ -183,12 +246,16 @@ export default function Phase2Page() {
       const data = await requestJson<TransactionListItem[]>(
         buildTransactionQuery(riskFilter, statusFilter),
       );
-      setTransactions(data);
+      const filteredData = filterTransactionsByDate(data, startDate, endDate);
+      setTransactions(filteredData);
       setSelectedTransactionId((currentId) => {
-        if (currentId && data.some((transaction) => transaction.id === currentId)) {
+        if (
+          currentId &&
+          filteredData.some((transaction) => transaction.id === currentId)
+        ) {
           return currentId;
         }
-        return data[0]?.id ?? null;
+        return filteredData[0]?.id ?? null;
       });
     } catch (error) {
       setTransactions([]);
@@ -244,7 +311,7 @@ export default function Phase2Page() {
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      void loadTransactions("all", "전체");
+      void loadTransactions("all", "전체", "", "");
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
@@ -287,7 +354,12 @@ export default function Phase2Page() {
       );
       setAnalyzeSummary(data);
       setPageMessage("거래 분석이 완료되었습니다.");
-      await loadTransactions(appliedRiskLevelFilter, appliedReviewStatusFilter);
+      await loadTransactions(
+        appliedRiskLevelFilter,
+        appliedReviewStatusFilter,
+        appliedStartDate,
+        appliedEndDate,
+      );
     } catch {
       setPageMessage(
         "거래 분석을 실행하지 못했습니다. 백엔드 서버 상태를 확인해 주세요.",
@@ -300,29 +372,92 @@ export default function Phase2Page() {
   async function handleStatusChanged() {
     if (selectedTransactionId) {
       await Promise.all([
-        loadTransactions(appliedRiskLevelFilter, appliedReviewStatusFilter),
+        loadTransactions(
+          appliedRiskLevelFilter,
+          appliedReviewStatusFilter,
+          appliedStartDate,
+          appliedEndDate,
+        ),
         loadSelectedTransaction(selectedTransactionId),
       ]);
     } else {
-      await loadTransactions(appliedRiskLevelFilter, appliedReviewStatusFilter);
+      await loadTransactions(
+        appliedRiskLevelFilter,
+        appliedReviewStatusFilter,
+        appliedStartDate,
+        appliedEndDate,
+      );
     }
   }
 
   async function handleSearch() {
+    if (isInvalidDateRange(draftStartDate, draftEndDate)) {
+      setFilterMessage("시작 거래일은 종료 거래일보다 늦을 수 없습니다.");
+      return;
+    }
+
+    setFilterMessage(null);
     setAppliedRiskLevelFilter(draftRiskLevelFilter);
     setAppliedReviewStatusFilter(draftReviewStatusFilter);
-    await loadTransactions(draftRiskLevelFilter, draftReviewStatusFilter);
+    setAppliedStartDate(draftStartDate);
+    setAppliedEndDate(draftEndDate);
+    await loadTransactions(
+      draftRiskLevelFilter,
+      draftReviewStatusFilter,
+      draftStartDate,
+      draftEndDate,
+    );
   }
 
   async function handleResetFilters() {
     setDraftRiskLevelFilter("all");
     setDraftReviewStatusFilter("전체");
+    setDraftStartDate("");
+    setDraftEndDate("");
     setAppliedRiskLevelFilter("all");
     setAppliedReviewStatusFilter("전체");
-    await loadTransactions("all", "전체");
+    setAppliedStartDate("");
+    setAppliedEndDate("");
+    setFilterMessage(null);
+    await loadTransactions("all", "전체", "", "");
   }
 
   const selectedDetection = selectedTransactionDetail?.detection ?? null;
+
+  const dashboardSummary = useMemo(() => {
+    const totalCount = transactions.length;
+    const suspiciousCount = getStatusCount(transactions, "의심거래");
+    const unreviewedCount = getStatusCount(transactions, "미확인");
+    const inReviewCount = getStatusCount(transactions, "검토중");
+    const normalCount = getStatusCount(transactions, "정상거래");
+    const highCount = getRiskCount(transactions, "high");
+    const mediumCount = getRiskCount(transactions, "medium");
+    const lowCount = getRiskCount(transactions, "low");
+
+    return {
+      totalCount,
+      suspiciousCount,
+      unreviewedCount,
+      inReviewCount,
+      normalCount,
+      risk: {
+        high: highCount,
+        medium: mediumCount,
+        low: lowCount,
+      },
+      statuses: [
+        { label: "미확인", value: unreviewedCount },
+        { label: "검토중", value: inReviewCount },
+        { label: "정상거래", value: normalCount },
+        { label: "의심거래", value: suspiciousCount },
+      ],
+      risks: [
+        { label: "상", value: highCount, tone: "bg-red-500" },
+        { label: "중", value: mediumCount, tone: "bg-amber-500" },
+        { label: "하", value: lowCount, tone: "bg-emerald-500" },
+      ],
+    };
+  }, [transactions]);
 
   const analyzeSummaryContent = useMemo(() => {
     if (!analyzeSummary) {
@@ -385,14 +520,24 @@ export default function Phase2Page() {
         ) : null}
 
         <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+            FDS 의심거래 탐지
+          </h1>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+            샘플 거래 데이터를 기반으로 의심 패턴을 탐지하고 담당자 검토
+            리포트 초안을 확인하는 화면입니다.
+          </p>
+        </section>
+
+        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-                Phase 2. FDS 의심거래 탐지
+              <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+                분석 실행
               </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                샘플 거래 데이터를 기반으로 의심 패턴을 탐지하고 담당자
-                검토 리포트 초안을 확인하는 화면
+              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+                샘플 거래 데이터에 룰 기반 탐지를 적용하고 목록과 요약
+                현황을 다시 계산합니다.
               </p>
             </div>
             <button
@@ -417,7 +562,58 @@ export default function Phase2Page() {
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+              거래 현황 요약
+            </h2>
+            <p className="text-sm text-slate-500">
+              현재 조회 조건에 해당하는 거래 목록 기준으로 집계합니다.
+            </p>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <SummaryCard label="전체 거래" value={dashboardSummary.totalCount} />
+            <SummaryCard
+              label="의심거래"
+              value={dashboardSummary.suspiciousCount}
+            />
+            <SummaryCard
+              label="미확인"
+              value={dashboardSummary.unreviewedCount}
+            />
+            <SummaryCard
+              label="검토중"
+              value={dashboardSummary.inReviewCount}
+            />
+          </div>
+
+          <div className="mt-5 grid gap-5 lg:grid-cols-2">
+            <SummaryBarGroup
+              title="검토 상태별 현황"
+              totalCount={dashboardSummary.totalCount}
+              items={dashboardSummary.statuses.map((item) => ({
+                ...item,
+                tone: item.label === "의심거래" ? "bg-red-500" : "bg-slate-500",
+              }))}
+            />
+            <SummaryBarGroup
+              title="위험도별 현황"
+              totalCount={dashboardSummary.totalCount}
+              items={dashboardSummary.risks}
+            />
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+              조회 조건
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              조건을 선택한 뒤 조회를 눌러야 목록에 반영됩니다.
+            </p>
+          </div>
+          <div className="mt-4 flex flex-col gap-4 xl:flex-row xl:items-end">
             <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-800 sm:max-w-56">
               위험도 필터
               <select
@@ -452,6 +648,24 @@ export default function Phase2Page() {
                 ))}
               </select>
             </label>
+            <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-800 sm:max-w-56">
+              시작 거래일
+              <input
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                type="date"
+                value={draftStartDate}
+                onChange={(event) => setDraftStartDate(event.target.value)}
+              />
+            </label>
+            <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-800 sm:max-w-56">
+              종료 거래일
+              <input
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                type="date"
+                value={draftEndDate}
+                onChange={(event) => setDraftEndDate(event.target.value)}
+              />
+            </label>
             <div className="flex gap-2">
               <button
                 className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
@@ -475,15 +689,18 @@ export default function Phase2Page() {
               </button>
             </div>
           </div>
-          <p className="mt-3 text-xs text-slate-500">
-            필터 선택 후 조회를 눌러야 목록에 반영됩니다.
-          </p>
+          {filterMessage ? (
+            <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              {filterMessage}
+            </p>
+          ) : null}
           <p className="mt-1 text-xs text-slate-500">
             적용 조건: 위험도{" "}
             {riskFilterOptions.find(
               (option) => option.value === appliedRiskLevelFilter,
             )?.label ?? "전체"}{" "}
-            / 검토상태 {appliedReviewStatusFilter}
+            / 검토상태 {appliedReviewStatusFilter} / 거래일{" "}
+            {appliedStartDate || "전체"} ~ {appliedEndDate || "전체"}
           </p>
         </section>
 
@@ -642,6 +859,51 @@ export default function Phase2Page() {
             )}
         </section>
       </main>
+    </div>
+  );
+}
+
+function SummaryCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
+    </div>
+  );
+}
+
+function SummaryBarGroup({
+  title,
+  totalCount,
+  items,
+}: {
+  title: string;
+  totalCount: number;
+  items: Array<{ label: string; value: number; tone: string }>;
+}) {
+  return (
+    <div className="rounded-md border border-slate-200 bg-white p-4">
+      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+      <div className="mt-4 space-y-3">
+        {items.map((item) => {
+          const width = totalCount > 0 ? (item.value / totalCount) * 100 : 0;
+
+          return (
+            <div key={item.label}>
+              <div className="mb-1 flex items-center justify-between text-xs text-slate-600">
+                <span className="font-medium">{item.label}</span>
+                <span>{item.value}건</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className={`h-full rounded-full ${item.tone}`}
+                  style={{ width: `${width}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

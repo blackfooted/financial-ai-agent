@@ -76,15 +76,15 @@ export function TransactionTable({
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <thead className="bg-slate-50 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-4 py-3">거래 ID</th>
               <th className="px-4 py-3">고객 ID</th>
-              <th className="px-4 py-3 text-right">금액</th>
+              <th className="px-4 py-3">금액</th>
               <th className="px-4 py-3">채널</th>
               <th className="px-4 py-3">거래 시각</th>
               <th className="px-4 py-3">위험도</th>
-              <th className="px-4 py-3 text-right">risk_score</th>
+              <th className="px-4 py-3">risk_score</th>
               <th className="px-4 py-3">검토 상태</th>
             </tr>
           </thead>
