@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { AppShell } from "@/components/AppShell";
+import { PhaseNav } from "@/components/PhaseNav";
 import { ReportCard, type Phase2Report } from "@/components/phase2/ReportCard";
 import { ReviewStatusButton } from "@/components/phase2/ReviewStatusButton";
 import {
@@ -148,8 +148,13 @@ export default function Phase2Page() {
   const [analyzeSummary, setAnalyzeSummary] = useState<AnalyzeSummary | null>(
     null,
   );
-  const [riskLevelFilter, setRiskLevelFilter] = useState<RiskFilter>("all");
-  const [reviewStatusFilter, setReviewStatusFilter] =
+  const [draftRiskLevelFilter, setDraftRiskLevelFilter] =
+    useState<RiskFilter>("all");
+  const [draftReviewStatusFilter, setDraftReviewStatusFilter] =
+    useState<ReviewStatusFilter>("전체");
+  const [appliedRiskLevelFilter, setAppliedRiskLevelFilter] =
+    useState<RiskFilter>("all");
+  const [appliedReviewStatusFilter, setAppliedReviewStatusFilter] =
     useState<ReviewStatusFilter>("전체");
   const [isListLoading, setIsListLoading] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
@@ -163,14 +168,20 @@ export default function Phase2Page() {
     null,
   );
   const [pageMessage, setPageMessage] = useState<string | null>(null);
+  const [pendingNavMessage, setPendingNavMessage] = useState<string | null>(
+    null,
+  );
 
-  const loadTransactions = useCallback(async () => {
+  const loadTransactions = useCallback(async (
+    riskFilter: RiskFilter,
+    statusFilter: ReviewStatusFilter,
+  ) => {
     setIsListLoading(true);
     setListErrorMessage(null);
 
     try {
       const data = await requestJson<TransactionListItem[]>(
-        buildTransactionQuery(riskLevelFilter, reviewStatusFilter),
+        buildTransactionQuery(riskFilter, statusFilter),
       );
       setTransactions(data);
       setSelectedTransactionId((currentId) => {
@@ -190,7 +201,7 @@ export default function Phase2Page() {
     } finally {
       setIsListLoading(false);
     }
-  }, [riskLevelFilter, reviewStatusFilter]);
+  }, []);
 
   const loadSelectedTransaction = useCallback(async (transactionId: string) => {
     setIsDetailLoading(true);
@@ -233,7 +244,7 @@ export default function Phase2Page() {
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      void loadTransactions();
+      void loadTransactions("all", "전체");
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
@@ -276,12 +287,10 @@ export default function Phase2Page() {
       );
       setAnalyzeSummary(data);
       setPageMessage("거래 분석이 완료되었습니다.");
-      await loadTransactions();
-    } catch (error) {
+      await loadTransactions(appliedRiskLevelFilter, appliedReviewStatusFilter);
+    } catch {
       setPageMessage(
-        error instanceof Error
-          ? error.message
-          : "거래 분석 실행 중 오류가 발생했습니다.",
+        "거래 분석을 실행하지 못했습니다. 백엔드 서버 상태를 확인해 주세요.",
       );
     } finally {
       setIsAnalyzeLoading(false);
@@ -291,12 +300,26 @@ export default function Phase2Page() {
   async function handleStatusChanged() {
     if (selectedTransactionId) {
       await Promise.all([
-        loadTransactions(),
+        loadTransactions(appliedRiskLevelFilter, appliedReviewStatusFilter),
         loadSelectedTransaction(selectedTransactionId),
       ]);
     } else {
-      await loadTransactions();
+      await loadTransactions(appliedRiskLevelFilter, appliedReviewStatusFilter);
     }
+  }
+
+  async function handleSearch() {
+    setAppliedRiskLevelFilter(draftRiskLevelFilter);
+    setAppliedReviewStatusFilter(draftReviewStatusFilter);
+    await loadTransactions(draftRiskLevelFilter, draftReviewStatusFilter);
+  }
+
+  async function handleResetFilters() {
+    setDraftRiskLevelFilter("all");
+    setDraftReviewStatusFilter("전체");
+    setAppliedRiskLevelFilter("all");
+    setAppliedReviewStatusFilter("전체");
+    await loadTransactions("all", "전체");
   }
 
   const selectedDetection = selectedTransactionDetail?.detection ?? null;
@@ -340,8 +363,27 @@ export default function Phase2Page() {
   }, [analyzeSummary]);
 
   return (
-    <AppShell>
-      <div className="space-y-6">
+    <div className="min-h-screen bg-slate-50 text-slate-950">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:px-8">
+          <p className="shrink-0 text-base font-semibold text-slate-950">
+            Financial AI Agent
+          </p>
+          <PhaseNav
+            onPendingPhaseClick={() =>
+              setPendingNavMessage("해당 Phase는 아직 준비 중입니다.")
+            }
+          />
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+        {pendingNavMessage ? (
+          <p className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+            {pendingNavMessage}
+          </p>
+        ) : null}
+
         <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -375,14 +417,14 @@ export default function Phase2Page() {
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="flex flex-col gap-2 text-sm font-medium text-slate-800">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+            <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-800 sm:max-w-56">
               위험도 필터
               <select
                 className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                value={riskLevelFilter}
+                value={draftRiskLevelFilter}
                 onChange={(event) =>
-                  setRiskLevelFilter(event.target.value as RiskFilter)
+                  setDraftRiskLevelFilter(event.target.value as RiskFilter)
                 }
               >
                 {riskFilterOptions.map((option) => (
@@ -392,13 +434,13 @@ export default function Phase2Page() {
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-2 text-sm font-medium text-slate-800">
+            <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-800 sm:max-w-56">
               검토상태 필터
               <select
                 className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                value={reviewStatusFilter}
+                value={draftReviewStatusFilter}
                 onChange={(event) =>
-                  setReviewStatusFilter(
+                  setDraftReviewStatusFilter(
                     event.target.value as ReviewStatusFilter,
                   )
                 }
@@ -410,17 +452,49 @@ export default function Phase2Page() {
                 ))}
               </select>
             </label>
+            <div className="flex gap-2">
+              <button
+                className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                disabled={isListLoading}
+                type="button"
+                onClick={() => {
+                  void handleSearch();
+                }}
+              >
+                조회
+              </button>
+              <button
+                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
+                disabled={isListLoading}
+                type="button"
+                onClick={() => {
+                  void handleResetFilters();
+                }}
+              >
+                초기화
+              </button>
+            </div>
           </div>
+          <p className="mt-3 text-xs text-slate-500">
+            필터 선택 후 조회를 눌러야 목록에 반영됩니다.
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            적용 조건: 위험도{" "}
+            {riskFilterOptions.find(
+              (option) => option.value === appliedRiskLevelFilter,
+            )?.label ?? "전체"}{" "}
+            / 검토상태 {appliedReviewStatusFilter}
+          </p>
         </section>
 
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-lg font-semibold tracking-tight">거래 목록</h3>
             <p className="text-sm text-slate-500">
-              {transactions.length}건 표시
+              {isListLoading ? "조회 중" : `${transactions.length}건 표시`}
             </p>
           </div>
-          {!selectedTransactionId && !isListLoading ? (
+          {!selectedTransactionId && !isListLoading && transactions.length > 0 ? (
             <p className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
               거래 행을 선택하면 상세 정보와 mock 리포트 초안을 확인할 수 있습니다.
             </p>
@@ -434,8 +508,7 @@ export default function Phase2Page() {
           />
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-lg font-semibold tracking-tight">
                 거래 상세 정보
@@ -548,28 +621,27 @@ export default function Phase2Page() {
                     )}
                   </p>
                 </div>
+
+                <ReviewStatusButton
+                  key={selectedTransactionId ?? "no-transaction"}
+                  transactionId={selectedTransactionId}
+                  currentStatus={selectedDetection?.review_status ?? null}
+                  onStatusChanged={handleStatusChanged}
+                />
+
+                <ReportCard
+                  report={report}
+                  isLoading={isReportLoading}
+                  errorMessage={reportErrorMessage}
+                />
               </div>
             ) : (
               <p className="mt-4 rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                 거래를 선택하면 상세 정보가 표시됩니다.
               </p>
             )}
-          </section>
-
-          <div className="space-y-6">
-            <ReviewStatusButton
-              transactionId={selectedTransactionId}
-              currentStatus={selectedDetection?.review_status ?? null}
-              onStatusChanged={handleStatusChanged}
-            />
-            <ReportCard
-              report={report}
-              isLoading={isReportLoading}
-              errorMessage={reportErrorMessage}
-            />
-          </div>
-        </div>
-      </div>
-    </AppShell>
+        </section>
+      </main>
+    </div>
   );
 }

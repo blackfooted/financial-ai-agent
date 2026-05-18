@@ -1,5 +1,36 @@
 # Phase 2 Changelog
 
+## [v0.8] 2026-05-18
+
+### 변경 코드: frontend/components/PhaseNav.tsx
+- GNB 메뉴 클릭 시 Phase 1/Phase 2 화면 전환이 정상 동작하도록 보정했다.
+- Phase 2 탭 이동 경로와 현재 경로 기반 활성 메뉴 표시를 점검했다.
+
+### 변경 코드: frontend/app/phase2/page.tsx
+- Phase 2 화면에서 Phase 1 금융상품추천 영역이 노출되지 않도록 화면 구성을 정리했다.
+- 필터 영역을 왼쪽 정렬 기준으로 조정했다.
+- 필터 선택 후 조회 버튼을 눌러야 목록이 조회되도록 UX를 변경했다.
+- 거래 상세 정보 하단에 의심거래 리포트가 표시되도록 레이아웃을 조정했다.
+
+### 변경 코드: frontend/components/phase2/ReviewStatusButton.tsx
+- 검토 상태 선택만으로 저장되지 않도록 변경했다.
+- 저장 버튼 클릭 시에만 상태 변경 API가 호출되도록 보정했다.
+- 현재 상태, 변경 예정 상태, 저장 성공/실패 메시지를 보강했다.
+
+### 변경 코드: frontend/components/phase2/ReportCard.tsx
+- 거래 상세 하단 배치에 맞춰 리포트 가독성을 개선했다.
+
+### 변경 코드: frontend/components/phase2/TransactionTable.tsx
+- Phase 2 목록/선택 UX를 레이아웃 변경에 맞춰 보정했다.
+
+### 변경 사유
+- Phase 2 검토 화면에서 사용자의 의도 없는 조회/저장을 방지하고, Phase 1/2 콘텐츠 분리와 리포트 가독성을 개선하기 위함이다.
+
+### 영향 범위
+- 영향 문서: changelog.md
+- 영향 기능: Phase 2 GNB 이동, 필터 조회 UX, 검토 상태 저장 UX, 리포트 표시 레이아웃
+- 코드 영향: Phase 2 프론트엔드 화면 및 PhaseNav 탭 이동 보정
+
 ## [v0.7] 2026-05-18
 
 ### 변경 문서: README.md

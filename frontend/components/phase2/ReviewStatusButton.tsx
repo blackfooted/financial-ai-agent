@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type ReviewStatusButtonProps = {
   transactionId: string | null;
@@ -28,10 +28,7 @@ async function patchReviewStatus(transactionId: string, reviewStatus: string) {
 
   const body = await response.json().catch(() => null);
   if (!response.ok || body?.success === false) {
-    throw new Error(
-      body?.error?.message ||
-        "검토 상태를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.",
-    );
+    throw new Error("검토 상태를 저장하지 못했습니다.");
   }
 }
 
@@ -40,38 +37,38 @@ export function ReviewStatusButton({
   currentStatus,
   onStatusChanged,
 }: ReviewStatusButtonProps) {
-  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [draftStatus, setDraftStatus] = useState<string>(currentStatus ?? "");
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  async function handleStatusChange(nextStatus: string) {
+  const isDirty = useMemo(
+    () => Boolean(transactionId && currentStatus && draftStatus !== currentStatus),
+    [currentStatus, draftStatus, transactionId],
+  );
+
+  async function handleSave() {
     if (
       !transactionId ||
-      nextStatus === currentStatus ||
-      !reviewStatusOptions.includes(nextStatus)
+      !isDirty ||
+      !reviewStatusOptions.includes(draftStatus)
     ) {
       return;
     }
 
     setIsSaving(true);
-    setPendingStatus(nextStatus);
     setErrorMessage(null);
     setSuccessMessage(null);
 
     try {
-      await patchReviewStatus(transactionId, nextStatus);
+      await patchReviewStatus(transactionId, draftStatus);
       await onStatusChanged();
-      setSuccessMessage(`검토 상태가 ${nextStatus}(으)로 변경되었습니다.`);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "검토 상태를 변경하지 못했습니다.",
-      );
+      setSuccessMessage(`검토 상태가 ${draftStatus}(으)로 저장되었습니다.`);
+    } catch {
+      setDraftStatus(currentStatus ?? "");
+      setErrorMessage("검토 상태를 저장하지 못했습니다. 상태는 변경되지 않았습니다.");
     } finally {
       setIsSaving(false);
-      setPendingStatus(null);
     }
   }
 
@@ -99,10 +96,11 @@ export function ReviewStatusButton({
           id="phase2-review-status"
           className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-100"
           disabled={!transactionId || isSaving}
-          value={currentStatus ?? ""}
+          value={draftStatus}
           onChange={(event) => {
-            const nextStatus = event.target.value;
-            void handleStatusChange(nextStatus);
+            setDraftStatus(event.target.value);
+            setErrorMessage(null);
+            setSuccessMessage(null);
           }}
         >
           {!currentStatus ? <option value="">거래를 선택하세요</option> : null}
@@ -114,11 +112,21 @@ export function ReviewStatusButton({
         </select>
         <p className="text-xs leading-5 text-slate-500">
           {isSaving
-            ? `${pendingStatus ?? "선택한 상태"}(으)로 변경하는 중입니다.`
-            : pendingStatus && pendingStatus !== currentStatus
-              ? `${pendingStatus}(으)로 변경을 요청합니다.`
-              : "담당자 식별자는 analyst-01로 전달됩니다."}
+            ? "검토 상태를 저장하는 중입니다."
+            : isDirty
+              ? `변경 예정 상태: ${draftStatus}`
+              : "상태를 선택한 뒤 저장을 눌러야 반영됩니다."}
         </p>
+        <button
+          className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+          disabled={!isDirty || isSaving}
+          type="button"
+          onClick={() => {
+            void handleSave();
+          }}
+        >
+          {isSaving ? "저장 중" : "저장"}
+        </button>
         {successMessage ? (
           <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
             {successMessage}

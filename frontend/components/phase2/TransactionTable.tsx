@@ -95,6 +95,7 @@ export function TransactionTable({
               return (
                 <tr
                   key={transaction.id}
+                  aria-selected={isSelected}
                   className={`cursor-pointer transition-colors hover:bg-emerald-50 ${
                     isSelected
                       ? "bg-emerald-50 ring-1 ring-inset ring-emerald-200"

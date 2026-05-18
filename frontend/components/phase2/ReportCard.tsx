@@ -37,7 +37,7 @@ export function ReportCard({
 }: ReportCardProps) {
   if (isLoading) {
     return (
-      <section className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600">
+      <section className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-sm">
         리포트 초안을 불러오는 중입니다.
       </section>
     );
@@ -53,7 +53,7 @@ export function ReportCard({
 
   if (!report) {
     return (
-      <section className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600">
+      <section className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-sm">
         거래를 선택하면 mock 리포트 초안이 표시됩니다.
       </section>
     );
@@ -78,7 +78,7 @@ export function ReportCard({
         </div>
       </div>
 
-      <div className="mt-5 space-y-5">
+      <div className="mt-5 space-y-6">
         <div>
           <h4 className="text-sm font-semibold text-slate-900">요약</h4>
           <p className="mt-2 rounded-md bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
@@ -128,7 +128,7 @@ export function ReportCard({
 
         <ReportSection title="위험 요인">
           {report.risk_factors && report.risk_factors.length > 0 ? (
-            <div className="space-y-3">
+            <div className="grid gap-3 lg:grid-cols-2">
               {report.risk_factors.map((factor) => (
                 <article
                   className="rounded-md border border-slate-200 bg-slate-50 p-4"
@@ -154,21 +154,23 @@ export function ReportCard({
           )}
         </ReportSection>
 
-        <ReportSection title="검토 포인트">
-          <List items={report.review_points} />
-        </ReportSection>
+        <div className="grid gap-5 lg:grid-cols-2">
+          <ReportSection title="검토 포인트">
+            <List items={report.review_points} />
+          </ReportSection>
 
-        <ReportSection title="권장 확인 액션">
-          <List items={report.recommended_actions ?? []} />
-        </ReportSection>
+          <ReportSection title="권장 확인 액션">
+            <List items={report.recommended_actions ?? []} />
+          </ReportSection>
 
-        <ReportSection title="고객·거래 맥락 확인 질문">
-          <List items={report.customer_context_questions ?? []} />
-        </ReportSection>
+          <ReportSection title="고객·거래 맥락 확인 질문">
+            <List items={report.customer_context_questions ?? []} />
+          </ReportSection>
 
-        <ReportSection title="리포트 한계">
-          <List items={report.limitations ?? []} />
-        </ReportSection>
+          <ReportSection title="리포트 한계">
+            <List items={report.limitations ?? []} />
+          </ReportSection>
+        </div>
 
         <p className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-medium leading-5 text-amber-900">
           최종 판단은 담당자가 수행합니다. {report.disclaimer}
