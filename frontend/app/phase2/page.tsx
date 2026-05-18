@@ -220,6 +220,7 @@ export default function Phase2Page() {
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [isReportLoading, setIsReportLoading] = useState(false);
   const [isAnalyzeLoading, setIsAnalyzeLoading] = useState(false);
+  const [isRefreshLoading, setIsRefreshLoading] = useState(false);
   const [listErrorMessage, setListErrorMessage] = useState<string | null>(null);
   const [detailErrorMessage, setDetailErrorMessage] = useState<string | null>(
     null,
@@ -229,6 +230,10 @@ export default function Phase2Page() {
   );
   const [pageMessage, setPageMessage] = useState<string | null>(null);
   const [filterMessage, setFilterMessage] = useState<string | null>(null);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
+  const [refreshErrorMessage, setRefreshErrorMessage] = useState<string | null>(
+    null,
+  );
   const [pendingNavMessage, setPendingNavMessage] = useState<string | null>(
     null,
   );
@@ -238,7 +243,7 @@ export default function Phase2Page() {
     statusFilter: ReviewStatusFilter,
     startDate: DateFilter,
     endDate: DateFilter,
-  ) => {
+  ): Promise<TransactionListItem[] | null> => {
     setIsListLoading(true);
     setListErrorMessage(null);
 
@@ -257,6 +262,7 @@ export default function Phase2Page() {
         }
         return filteredData[0]?.id ?? null;
       });
+      return filteredData;
     } catch (error) {
       setTransactions([]);
       setSelectedTransactionId(null);
@@ -265,6 +271,7 @@ export default function Phase2Page() {
           ? error.message
           : "거래 목록을 불러오지 못했습니다.",
       );
+      return null;
     } finally {
       setIsListLoading(false);
     }
@@ -301,7 +308,7 @@ export default function Phase2Page() {
       setReportErrorMessage(
         reportResult.reason instanceof Error
           ? reportResult.reason.message
-          : "리포트 초안을 불러오지 못했습니다.",
+          : "의심거래 검토 리포트 초안을 불러오지 못했습니다.",
       );
     }
 
@@ -353,7 +360,7 @@ export default function Phase2Page() {
         },
       );
       setAnalyzeSummary(data);
-      setPageMessage("거래 분석이 완료되었습니다.");
+      setPageMessage("의심거래 후보 탐지가 완료되었습니다.");
       await loadTransactions(
         appliedRiskLevelFilter,
         appliedReviewStatusFilter,
@@ -362,7 +369,7 @@ export default function Phase2Page() {
       );
     } catch {
       setPageMessage(
-        "거래 분석을 실행하지 못했습니다. 백엔드 서버 상태를 확인해 주세요.",
+        "의심거래 후보 탐지를 실행하지 못했습니다. 백엔드 서버 상태를 확인해 주세요.",
       );
     } finally {
       setIsAnalyzeLoading(false);
@@ -370,23 +377,88 @@ export default function Phase2Page() {
   }
 
   async function handleStatusChanged() {
+    setRefreshMessage(null);
+    setRefreshErrorMessage(null);
+
     if (selectedTransactionId) {
-      await Promise.all([
-        loadTransactions(
-          appliedRiskLevelFilter,
-          appliedReviewStatusFilter,
-          appliedStartDate,
-          appliedEndDate,
-        ),
-        loadSelectedTransaction(selectedTransactionId),
-      ]);
-    } else {
-      await loadTransactions(
+      const nextTransactions = await loadTransactions(
         appliedRiskLevelFilter,
         appliedReviewStatusFilter,
         appliedStartDate,
         appliedEndDate,
       );
+
+      if (!nextTransactions) {
+        setRefreshErrorMessage(
+          "검토 상태는 저장되었지만 거래 목록을 새로고침하지 못했습니다.",
+        );
+        return;
+      }
+
+      const nextSelectedId = nextTransactions.some(
+        (transaction) => transaction.id === selectedTransactionId,
+      )
+        ? selectedTransactionId
+        : nextTransactions[0]?.id;
+
+      if (nextSelectedId) {
+        await loadSelectedTransaction(nextSelectedId);
+      }
+
+      setRefreshMessage("검토 상태가 저장되었고 검토 현황을 갱신했습니다.");
+    } else {
+      const nextTransactions = await loadTransactions(
+        appliedRiskLevelFilter,
+        appliedReviewStatusFilter,
+        appliedStartDate,
+        appliedEndDate,
+      );
+
+      if (nextTransactions) {
+        setRefreshMessage("검토 상태가 저장되었고 검토 현황을 갱신했습니다.");
+      } else {
+        setRefreshErrorMessage(
+          "검토 상태는 저장되었지만 거래 목록을 새로고침하지 못했습니다.",
+        );
+      }
+    }
+  }
+
+  async function handleRefresh() {
+    setIsRefreshLoading(true);
+    setRefreshMessage(null);
+    setRefreshErrorMessage(null);
+
+    try {
+      const nextTransactions = await loadTransactions(
+        appliedRiskLevelFilter,
+        appliedReviewStatusFilter,
+        appliedStartDate,
+        appliedEndDate,
+      );
+
+      if (!nextTransactions) {
+        setRefreshErrorMessage(
+          "거래 목록을 새로고침하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        );
+        return;
+      }
+
+      const nextSelectedId =
+        selectedTransactionId &&
+        nextTransactions.some(
+          (transaction) => transaction.id === selectedTransactionId,
+        )
+          ? selectedTransactionId
+          : nextTransactions[0]?.id;
+
+      if (nextSelectedId) {
+        await loadSelectedTransaction(nextSelectedId);
+      }
+
+      setRefreshMessage("거래 목록과 검토 현황을 새로고침했습니다.");
+    } finally {
+      setIsRefreshLoading(false);
     }
   }
 
@@ -397,6 +469,8 @@ export default function Phase2Page() {
     }
 
     setFilterMessage(null);
+    setRefreshMessage(null);
+    setRefreshErrorMessage(null);
     setAppliedRiskLevelFilter(draftRiskLevelFilter);
     setAppliedReviewStatusFilter(draftReviewStatusFilter);
     setAppliedStartDate(draftStartDate);
@@ -419,6 +493,8 @@ export default function Phase2Page() {
     setAppliedStartDate("");
     setAppliedEndDate("");
     setFilterMessage(null);
+    setRefreshMessage(null);
+    setRefreshErrorMessage(null);
     await loadTransactions("all", "전체", "", "");
   }
 
@@ -463,36 +539,49 @@ export default function Phase2Page() {
     if (!analyzeSummary) {
       return (
         <p className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-          아직 실행한 분석 결과가 없습니다.
+          아직 실행한 의심거래 탐지 결과가 없습니다.
         </p>
       );
     }
 
     return (
-      <div className="grid gap-3 sm:grid-cols-5">
-        <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-xs text-slate-500">전체 거래</p>
-          <p className="mt-1 text-lg font-semibold">
-            {analyzeSummary.total_count}
-          </p>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold text-slate-900">
+            의심거래 탐지 결과
+          </h3>
+          <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+            탐지 실행 ID {analyzeSummary.analysis_id}
+          </span>
         </div>
-        <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-xs text-slate-500">탐지 거래</p>
-          <p className="mt-1 text-lg font-semibold">
-            {analyzeSummary.detected_count}
-          </p>
-        </div>
-        {(["low", "medium", "high"] as RiskLevel[]).map((level) => (
-          <div
-            className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-4 py-3"
-            key={level}
-          >
-            <RiskBadge riskLevel={level} />
-            <span className="text-lg font-semibold">
-              {analyzeSummary.risk_summary[level] ?? 0}
-            </span>
+        <div className="grid gap-3 sm:grid-cols-5">
+          <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+            <p className="text-xs text-slate-500">분석 대상 거래 수</p>
+            <p className="mt-1 text-lg font-semibold">
+              {analyzeSummary.total_count}
+            </p>
           </div>
-        ))}
+          <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+            <p className="text-xs text-slate-500">의심 후보 건수</p>
+            <p className="mt-1 text-lg font-semibold">
+              {analyzeSummary.detected_count}
+            </p>
+          </div>
+          {(["low", "medium", "high"] as RiskLevel[]).map((level) => (
+            <div
+              className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-4 py-3"
+              key={level}
+            >
+              <RiskBadge riskLevel={level} />
+              <span className="text-lg font-semibold">
+                {analyzeSummary.risk_summary[level] ?? 0}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-slate-500">
+          위험도별 의심 후보는 룰 기반 탐지 결과의 분포를 나타냅니다.
+        </p>
       </div>
     );
   }, [analyzeSummary]);
@@ -525,7 +614,7 @@ export default function Phase2Page() {
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
             샘플 거래 데이터를 기반으로 의심 패턴을 탐지하고 담당자 검토
-            리포트 초안을 확인하는 화면입니다.
+            의심거래 검토 리포트 초안을 확인하는 화면입니다.
           </p>
         </section>
 
@@ -533,11 +622,11 @@ export default function Phase2Page() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h2 className="text-lg font-semibold tracking-tight text-slate-950">
-                분석 실행
+                의심거래 탐지 실행
               </h2>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-                샘플 거래 데이터에 룰 기반 탐지를 적용하고 목록과 요약
-                현황을 다시 계산합니다.
+                샘플 거래내역에 탐지 룰을 적용해 의심거래 후보를
+                갱신합니다.
               </p>
             </div>
             <button
@@ -548,7 +637,7 @@ export default function Phase2Page() {
                 void handleAnalyze();
               }}
             >
-              {isAnalyzeLoading ? "분석 실행 중" : "거래 분석 실행"}
+              {isAnalyzeLoading ? "탐지 실행 중" : "의심거래 탐지 실행"}
             </button>
           </div>
 
@@ -562,17 +651,44 @@ export default function Phase2Page() {
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-semibold tracking-tight text-slate-950">
-              거래 현황 요약
-            </h2>
-            <p className="text-sm text-slate-500">
-              현재 조회 조건에 해당하는 거래 목록 기준으로 집계합니다.
-            </p>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+                검토 현황 대시보드
+              </h2>
+              <p className="text-sm text-slate-500">
+                현재 조회 조건에 해당하는 거래의 담당자 처리 현황과
+                위험도 분포를 보여줍니다.
+              </p>
+            </div>
+            <button
+              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
+              disabled={isListLoading || isRefreshLoading}
+              type="button"
+              onClick={() => {
+                void handleRefresh();
+              }}
+            >
+              {isRefreshLoading ? "새로고침 중" : "새로고침"}
+            </button>
           </div>
 
+          {refreshMessage ? (
+            <p className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              {refreshMessage}
+            </p>
+          ) : null}
+          {refreshErrorMessage ? (
+            <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {refreshErrorMessage}
+            </p>
+          ) : null}
+
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <SummaryCard label="전체 거래" value={dashboardSummary.totalCount} />
+            <SummaryCard
+              label="조회 거래 건수"
+              value={dashboardSummary.totalCount}
+            />
             <SummaryCard
               label="의심거래"
               value={dashboardSummary.suspiciousCount}
@@ -585,11 +701,15 @@ export default function Phase2Page() {
               label="검토중"
               value={dashboardSummary.inReviewCount}
             />
+            <SummaryCard label="정상거래" value={dashboardSummary.normalCount} />
+            <SummaryCard label="위험도 상" value={dashboardSummary.risk.high} />
+            <SummaryCard label="위험도 중" value={dashboardSummary.risk.medium} />
+            <SummaryCard label="위험도 하" value={dashboardSummary.risk.low} />
           </div>
 
           <div className="mt-5 grid gap-5 lg:grid-cols-2">
             <SummaryBarGroup
-              title="검토 상태별 현황"
+              title="담당자 처리 현황"
               totalCount={dashboardSummary.totalCount}
               items={dashboardSummary.statuses.map((item) => ({
                 ...item,
@@ -610,7 +730,8 @@ export default function Phase2Page() {
               조회 조건
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              조건을 선택한 뒤 조회를 눌러야 목록에 반영됩니다.
+              위험도, 검토상태, 거래일 기준으로 조회 대상을 좁힐 수
+              있습니다. 조건 변경 후 조회 버튼을 눌러야 적용됩니다.
             </p>
           </div>
           <div className="mt-4 flex flex-col gap-4 xl:flex-row xl:items-end">
@@ -713,7 +834,7 @@ export default function Phase2Page() {
           </div>
           {!selectedTransactionId && !isListLoading && transactions.length > 0 ? (
             <p className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
-              거래 행을 선택하면 상세 정보와 mock 리포트 초안을 확인할 수 있습니다.
+              거래 행을 선택하면 상세 정보와 의심거래 검토 리포트 초안을 확인할 수 있습니다.
             </p>
           ) : null}
           <TransactionTable
@@ -843,7 +964,7 @@ export default function Phase2Page() {
                   key={selectedTransactionId ?? "no-transaction"}
                   transactionId={selectedTransactionId}
                   currentStatus={selectedDetection?.review_status ?? null}
-                  onStatusChanged={handleStatusChanged}
+                  onStatusSaved={handleStatusChanged}
                 />
 
                 <ReportCard

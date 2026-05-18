@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 type ReviewStatusButtonProps = {
   transactionId: string | null;
   currentStatus: string | null;
-  onStatusChanged: () => Promise<void>;
+  onStatusSaved: () => Promise<void>;
 };
 
 const API_BASE_URL =
@@ -28,14 +28,14 @@ async function patchReviewStatus(transactionId: string, reviewStatus: string) {
 
   const body = await response.json().catch(() => null);
   if (!response.ok || body?.success === false) {
-    throw new Error("검토 상태를 저장하지 못했습니다.");
+    throw new Error("검토 상태를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
   }
 }
 
 export function ReviewStatusButton({
   transactionId,
   currentStatus,
-  onStatusChanged,
+  onStatusSaved,
 }: ReviewStatusButtonProps) {
   const [draftStatus, setDraftStatus] = useState<string>(currentStatus ?? "");
   const [isSaving, setIsSaving] = useState(false);
@@ -62,11 +62,11 @@ export function ReviewStatusButton({
 
     try {
       await patchReviewStatus(transactionId, draftStatus);
-      await onStatusChanged();
-      setSuccessMessage(`검토 상태가 ${draftStatus}(으)로 저장되었습니다.`);
+      await onStatusSaved();
+      setSuccessMessage("검토 상태가 저장되었고 검토 현황이 갱신되었습니다.");
     } catch {
       setDraftStatus(currentStatus ?? "");
-      setErrorMessage("검토 상태를 저장하지 못했습니다. 상태는 변경되지 않았습니다.");
+      setErrorMessage("검토 상태를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setIsSaving(false);
     }
@@ -77,7 +77,7 @@ export function ReviewStatusButton({
       <div className="flex flex-col gap-3">
         <div>
           <h3 className="text-sm font-semibold text-slate-900">
-            검토 상태 변경
+            담당자 검토 상태
           </h3>
           <p className="mt-1 text-xs leading-5 text-slate-500">
             현재 상태:{" "}

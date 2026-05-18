@@ -38,7 +38,7 @@ export function ReportCard({
   if (isLoading) {
     return (
       <section className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-sm">
-        리포트 초안을 불러오는 중입니다.
+        의심거래 검토 리포트 초안을 불러오는 중입니다.
       </section>
     );
   }
@@ -54,7 +54,7 @@ export function ReportCard({
   if (!report) {
     return (
       <section className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-sm">
-        거래를 선택하면 mock 리포트 초안이 표시됩니다.
+        거래를 선택하면 담당자 검토용 mock 리포트 초안이 표시됩니다.
       </section>
     );
   }
@@ -64,10 +64,14 @@ export function ReportCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold tracking-tight text-slate-950">
-            {report.report_title}
+            의심거래 검토 리포트
           </h3>
-          <p className="mt-1 text-sm text-slate-500">
-            거래 ID {report.transaction_id}
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">
+            탐지 룰과 거래 정보를 기반으로 생성한 담당자 검토용
+            초안입니다. 최종 판단은 담당자가 수행합니다.
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            거래 ID {report.transaction_id} / 초안 제목 {report.report_title}
           </p>
         </div>
         <div className="flex items-center gap-2">
