@@ -1,5 +1,36 @@
 # Phase 2 Changelog
 
+## [v0.3] 2026-05-18
+
+### 변경 문서: changelog.md
+- Phase 2 백엔드 mock API 구현 이력을 기록했다.
+
+### 변경 문서: api-spec.md
+- sample 외 데이터 소스 요청을 명확히 처리하기 위해 `PHASE2_INVALID_DATA_SOURCE` 에러 코드를 추가했다.
+
+### 변경 코드: backend/app/routes/phase2_transactions.py
+- Phase 2 거래 분석, 목록 조회, 상세 조회, 상태 변경, 리포트 조회 API를 추가했다.
+
+### 변경 코드: backend/app/services/phase2/transaction_service.py
+- 샘플 거래 데이터와 메모리 기반 거래 상태 관리 로직을 추가했다.
+
+### 변경 코드: backend/app/services/phase2/detection_service.py
+- HIGH_AMOUNT, NEW_DEVICE, REPEAT_TX, ODD_HOUR, LOCATION_MISMATCH 탐지 룰과 risk_score 산정 로직을 추가했다.
+
+### 변경 코드: backend/app/services/phase2/report_service.py
+- 외부 API 호출 없는 mock 리포트 생성 로직을 추가했다.
+
+### 변경 코드: backend/app/main.py
+- Phase 2 router를 등록했다.
+
+### 변경 사유
+- Step 3 백엔드 mock API 구현을 통해 Phase 2 의심거래 탐지와 담당자 검토 리포트 흐름을 API로 검증하기 위함이다.
+
+### 영향 범위
+- 영향 문서: changelog.md, api-spec.md
+- 영향 기능: Phase 2 백엔드 mock API
+- 코드 영향: Phase 2 신규 route/service 및 router 등록
+
 ## [v0.2] 2026-05-18
 
 ### 변경 문서: PRD.md
@@ -63,4 +94,3 @@
 - 영향 문서: PRD.md, data-definition.md, api-spec.md, changelog.md
 - 영향 기능: Phase 2 의심거래 탐지 및 담당자 검토 리포트 자동화 기획 기준
 - 코드 영향: 없음
-

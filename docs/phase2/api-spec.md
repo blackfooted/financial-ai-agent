@@ -65,6 +65,7 @@
 | PHASE2_DAILY_LIMIT_EXCEEDED | openai 모드에서 일일 호출 한도를 초과한 경우 |
 | PHASE2_INVALID_STATUS | 허용되지 않는 review_status 값이 전달된 경우 |
 | PHASE2_REPORT_NOT_READY | 리포트 생성 전 조회를 시도한 경우 |
+| PHASE2_INVALID_DATA_SOURCE | 현재 지원하지 않는 data_source 값이 전달된 경우 |
 
 ## API 목록
 
@@ -287,4 +288,3 @@ GET /api/phase2/transactions/tx-row-001/report
 - API Key는 서버 환경변수로만 관리하며, 프론트엔드 응답 또는 문서 예시에 포함하지 않는다.
 - 실패 시 동일 요청을 무제한 재시도하지 않고, 담당자가 재요청 여부를 판단할 수 있도록 에러를 반환한다.
 - AI 응답은 담당자 검토용 초안으로만 사용하며, 거래 차단 또는 `의심거래` 상태 변경을 자동 수행하지 않는다.
-

@@ -10,8 +10,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.append(str(REPO_ROOT))
 
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.append(str(BACKEND_ROOT))
+
 from app.config import ALLOWED_ORIGINS, APP_ENV
 from app.routes.health import router as health_router
+from app.routes.phase2_transactions import router as phase2_transactions_router
 from app.routes.recommendations import router as recommendations_router
 
 
@@ -41,3 +46,4 @@ app.add_middleware(
 
 app.include_router(health_router)
 app.include_router(recommendations_router)
+app.include_router(phase2_transactions_router)
