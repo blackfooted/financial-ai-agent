@@ -193,6 +193,10 @@ function getRiskCount(items: TransactionListItem[], riskLevel: RiskLevel) {
     .length;
 }
 
+function getDetectedCandidateTransactions(items: TransactionListItem[]) {
+  return items.filter((transaction) => transaction.risk_score > 0);
+}
+
 export default function Phase2Page() {
   const [transactions, setTransactions] = useState<TransactionListItem[]>([]);
   const [selectedTransactionId, setSelectedTransactionId] = useState<
@@ -501,54 +505,47 @@ export default function Phase2Page() {
   const selectedDetection = selectedTransactionDetail?.detection ?? null;
 
   const dashboardSummary = useMemo(() => {
-    const totalCount = transactions.length;
-    const suspiciousCount = getStatusCount(transactions, "의심거래");
-    const unreviewedCount = getStatusCount(transactions, "미확인");
-    const inReviewCount = getStatusCount(transactions, "검토중");
-    const normalCount = getStatusCount(transactions, "정상거래");
-    const highCount = getRiskCount(transactions, "high");
-    const mediumCount = getRiskCount(transactions, "medium");
-    const lowCount = getRiskCount(transactions, "low");
+    const processingTargetTransactions =
+      getDetectedCandidateTransactions(transactions);
+    const processingTargetCount = processingTargetTransactions.length;
+    const suspiciousCount = getStatusCount(
+      processingTargetTransactions,
+      "의심거래",
+    );
+    const unreviewedCount = getStatusCount(
+      processingTargetTransactions,
+      "미확인",
+    );
+    const inReviewCount = getStatusCount(
+      processingTargetTransactions,
+      "검토중",
+    );
+    const normalCount = getStatusCount(processingTargetTransactions, "정상거래");
 
     return {
-      totalCount,
+      processingTargetCount,
       suspiciousCount,
       unreviewedCount,
       inReviewCount,
       normalCount,
-      risk: {
-        high: highCount,
-        medium: mediumCount,
-        low: lowCount,
-      },
       statuses: [
         { label: "미확인", value: unreviewedCount },
         { label: "검토중", value: inReviewCount },
-        { label: "정상거래", value: normalCount },
         { label: "의심거래", value: suspiciousCount },
-      ],
-      risks: [
-        { label: "상", value: highCount, tone: "bg-red-500" },
-        { label: "중", value: mediumCount, tone: "bg-amber-500" },
-        { label: "하", value: lowCount, tone: "bg-emerald-500" },
+        { label: "정상거래", value: normalCount },
       ],
     };
   }, [transactions]);
 
-  const reviewNeededSummary = useMemo(() => {
-    const reviewNeededTransactions = transactions.filter((transaction) =>
-      ["미확인", "검토중"].includes(transaction.review_status),
-    );
-    const unreviewedCount = getStatusCount(reviewNeededTransactions, "미확인");
-    const inReviewCount = getStatusCount(reviewNeededTransactions, "검토중");
-    const highCount = getRiskCount(reviewNeededTransactions, "high");
-    const mediumCount = getRiskCount(reviewNeededTransactions, "medium");
-    const lowCount = getRiskCount(reviewNeededTransactions, "low");
+  const detectedCandidateSummary = useMemo(() => {
+    const detectedCandidateTransactions =
+      getDetectedCandidateTransactions(transactions);
+    const highCount = getRiskCount(detectedCandidateTransactions, "high");
+    const mediumCount = getRiskCount(detectedCandidateTransactions, "medium");
+    const lowCount = getRiskCount(detectedCandidateTransactions, "low");
 
     return {
-      reviewNeededCount: reviewNeededTransactions.length,
-      unreviewedCount,
-      inReviewCount,
+      totalCount: detectedCandidateTransactions.length,
       risk: {
         high: highCount,
         medium: mediumCount,
@@ -576,53 +573,39 @@ export default function Phase2Page() {
             탐지 실행 ID {analyzeSummary.analysis_id}
           </span>
         </div>
-        <div className="grid gap-3 sm:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-4">
           <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-xs text-slate-500">분석 대상 거래 수</p>
+            <p className="text-xs text-slate-500">거래건수</p>
             <p className="mt-1 text-lg font-semibold">
-              {analyzeSummary.total_count}
+              {detectedCandidateSummary.totalCount}
             </p>
           </div>
-          <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-xs text-slate-500">검토 필요 후보 건수</p>
-            <p className="mt-1 text-lg font-semibold">
-              {reviewNeededSummary.reviewNeededCount}
-            </p>
-          </div>
-          <div className="rounded-md border border-slate-200 bg-white px-4 py-3">
-            <p className="text-xs text-slate-500">미확인 후보</p>
-            <p className="mt-1 text-lg font-semibold">
-              {reviewNeededSummary.unreviewedCount}
-            </p>
-          </div>
-          <div className="rounded-md border border-slate-200 bg-white px-4 py-3">
-            <p className="text-xs text-slate-500">검토중 후보</p>
-            <p className="mt-1 text-lg font-semibold">
-              {reviewNeededSummary.inReviewCount}
-            </p>
-          </div>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {(["high", "medium", "low"] as RiskLevel[]).map((level) => (
+          {[
+            { label: "상", level: "high" as RiskLevel },
+            { label: "중", level: "medium" as RiskLevel },
+            { label: "하", level: "low" as RiskLevel },
+          ].map((item) => (
             <div
               className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-4 py-3"
-              key={level}
+              key={item.level}
             >
-              <RiskBadge riskLevel={level} />
+              <span className="text-xs font-medium text-slate-500">
+                {item.label}
+              </span>
               <span className="text-lg font-semibold">
-                {reviewNeededSummary.risk[level] ?? 0}
+                {detectedCandidateSummary.risk[item.level] ?? 0}
               </span>
             </div>
           ))}
         </div>
         <p className="text-xs text-slate-500">
-          위험도별 검토 필요 후보는 미확인 및 검토중 상태의 거래를
-          기준으로 계산됩니다. 탐지 결과 중 정상거래 또는 의심거래로 최종
-          처리된 건은 검토 필요 후보에서 제외됩니다.
+          탐지 결과는 룰 기반으로 추출된 의심 후보 거래 기준입니다.
+          담당자 처리 상태와 무관하게 탐지 룰에 해당한 거래 수를
+          표시합니다.
         </p>
       </div>
     );
-  }, [analyzeSummary, reviewNeededSummary]);
+  }, [analyzeSummary, detectedCandidateSummary]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
@@ -664,8 +647,7 @@ export default function Phase2Page() {
               </h2>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
                 샘플 거래내역에 탐지 룰을 적용해 의심거래 후보를
-                갱신합니다. 최종 처리된 정상거래와 의심거래는 검토 필요
-                후보에서 제외됩니다.
+                추출합니다.
               </p>
             </div>
             <button
@@ -693,23 +675,28 @@ export default function Phase2Page() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex flex-col gap-1">
               <h2 className="text-lg font-semibold tracking-tight text-slate-950">
-                검토 현황 대시보드
+                검토 현황
               </h2>
               <p className="text-sm text-slate-500">
-                현재 조회 조건에 해당하는 거래의 담당자 처리 현황과
-                위험도 분포를 보여줍니다. 최종 처리된 정상거래와
-                의심거래도 포함됩니다.
+                현재 조회 조건에 해당하는 처리대상의 담당자 검토 상태입니다.
               </p>
             </div>
             <button
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
+              aria-label="새로고침"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 bg-white text-lg font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
               disabled={isListLoading || isRefreshLoading}
+              title="새로고침"
               type="button"
               onClick={() => {
                 void handleRefresh();
               }}
             >
-              {isRefreshLoading ? "새로고침 중" : "새로고침"}
+              <span
+                aria-hidden="true"
+                className={isRefreshLoading ? "animate-spin" : undefined}
+              >
+                ↻
+              </span>
             </button>
           </div>
 
@@ -726,12 +713,8 @@ export default function Phase2Page() {
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard
-              label="조회 거래 건수"
-              value={dashboardSummary.totalCount}
-            />
-            <SummaryCard
-              label="의심거래"
-              value={dashboardSummary.suspiciousCount}
+              label="처리대상"
+              value={dashboardSummary.processingTargetCount}
             />
             <SummaryCard
               label="미확인"
@@ -741,25 +724,21 @@ export default function Phase2Page() {
               label="검토중"
               value={dashboardSummary.inReviewCount}
             />
+            <SummaryCard
+              label="의심거래"
+              value={dashboardSummary.suspiciousCount}
+            />
             <SummaryCard label="정상거래" value={dashboardSummary.normalCount} />
-            <SummaryCard label="위험도 상" value={dashboardSummary.risk.high} />
-            <SummaryCard label="위험도 중" value={dashboardSummary.risk.medium} />
-            <SummaryCard label="위험도 하" value={dashboardSummary.risk.low} />
           </div>
 
-          <div className="mt-5 grid gap-5 lg:grid-cols-2">
+          <div className="mt-5">
             <SummaryBarGroup
               title="담당자 처리 현황"
-              totalCount={dashboardSummary.totalCount}
+              totalCount={dashboardSummary.processingTargetCount}
               items={dashboardSummary.statuses.map((item) => ({
                 ...item,
                 tone: item.label === "의심거래" ? "bg-red-500" : "bg-slate-500",
               }))}
-            />
-            <SummaryBarGroup
-              title="위험도별 현황"
-              totalCount={dashboardSummary.totalCount}
-              items={dashboardSummary.risks}
             />
           </div>
         </section>
