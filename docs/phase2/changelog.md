@@ -1,5 +1,74 @@
 # Phase 2 Changelog
 
+## [v0.5] 2026-05-18
+
+### 변경 코드: backend/app/services/phase2/report_service.py
+- mock 리포트 초안의 섹션과 문장 품질을 개선했다.
+- 탐지 룰별 검토 포인트, 권장 확인 액션, 한계 문구를 보강했다.
+
+### 변경 코드: frontend/components/phase2/ReportCard.tsx
+- 리포트 섹션 표시를 고도화했다.
+- evidence_summary, risk_factors, recommended_actions, limitations 등 확장 필드 표시를 추가했다.
+
+### 변경 코드: frontend/components/phase2/ReviewStatusButton.tsx
+- 검토 상태 변경 UX를 보강했다.
+- loading, success, error 상태 표시를 개선했다.
+
+### 변경 코드: frontend/app/phase2/page.tsx
+- 거래 선택, 상세, 리포트, 상태 변경 흐름의 화면 구성을 개선했다.
+
+### 변경 코드: frontend/components/phase2/TransactionTable.tsx
+- 거래 목록 선택 상태와 빈 데이터 표시를 개선했다.
+
+### 변경 코드: frontend/components/phase2/RiskBadge.tsx
+- 위험도 표시 fallback 처리를 보강했다.
+
+### 변경 문서: docs/phase2/ai-policy.md
+- Phase 2 AI 리포트 역할, mock/openai 기준, 비용 방어, Human-in-the-loop 원칙을 문서화했다.
+
+### 변경 문서: changelog.md
+- Phase 2 Step 5 리포트 및 검토 UX 고도화 이력을 v0.5로 기록했다.
+
+### 변경 사유
+- 실제 OpenAI 호출 전 mock 리포트 품질과 담당자 검토 화면 UX를 개선하여 포트폴리오 시연 완성도를 높이기 위함이다.
+
+### 영향 범위
+- 영향 문서: ai-policy.md, changelog.md
+- 영향 기능: Phase 2 mock 리포트, 담당자 검토 화면, 상태 변경 UX
+- 코드 영향: Phase 2 report service 및 Phase 2 프론트엔드 전용 컴포넌트
+
+## [v0.4] 2026-05-18
+
+### 변경 코드: frontend/app/phase2/page.tsx
+- Phase 2 의심거래 탐지 화면을 신규 작성했다.
+- 거래 분석 실행, 목록 조회, 상세 조회, 리포트 조회, 검토 상태 변경 흐름을 연결했다.
+
+### 변경 코드: frontend/components/phase2/TransactionTable.tsx
+- Phase 2 거래 목록 테이블 컴포넌트를 추가했다.
+
+### 변경 코드: frontend/components/phase2/RiskBadge.tsx
+- 위험도 low/medium/high를 하/중/상 표시 배지로 렌더링하는 컴포넌트를 추가했다.
+
+### 변경 코드: frontend/components/phase2/ReportCard.tsx
+- mock 리포트 초안을 표시하는 컴포넌트를 추가했다.
+
+### 변경 코드: frontend/components/phase2/ReviewStatusButton.tsx
+- 담당자 검토 상태 변경 컴포넌트를 추가했다.
+
+### 변경 코드: frontend/components/PhaseNav.tsx
+- Phase 2 화면으로 이동하는 탭 항목을 추가했다.
+
+### 변경 문서: changelog.md
+- Phase 2 프론트엔드 화면 연결 이력을 v0.4로 기록했다.
+
+### 변경 사유
+- Step 4 프론트 화면 연결을 통해 Phase 2 백엔드 mock API를 사용자가 화면에서 검증할 수 있도록 하기 위함이다.
+
+### 영향 범위
+- 영향 문서: changelog.md
+- 영향 기능: Phase 2 프론트엔드 화면, Phase 2 API 연동
+- 코드 영향: Phase 2 신규 프론트엔드 페이지 및 컴포넌트, PhaseNav 탭 추가
+
 ## [v0.3] 2026-05-18
 
 ### 변경 문서: changelog.md

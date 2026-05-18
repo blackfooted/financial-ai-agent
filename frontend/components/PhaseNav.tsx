@@ -4,7 +4,7 @@ type PhaseNavProps = {
 
 const phases = [
   { title: "상품 비교 추천", active: true },
-  { title: "이상거래 탐지", active: false },
+  { title: "이상거래 탐지", active: false, href: "/phase2" },
   { title: "민원 분류·자동응답", active: false },
   { title: "기업분석 에이전트", active: false },
 ];
@@ -23,7 +23,15 @@ export function PhaseNav({ onPendingPhaseClick }: PhaseNavProps) {
                 ? "border-emerald-600 text-emerald-700"
                 : "border-transparent text-slate-400 hover:text-slate-600"
             }`}
-            onClick={item.active ? undefined : onPendingPhaseClick}
+            onClick={
+              item.active
+                ? undefined
+                : item.href
+                  ? () => {
+                      window.location.href = item.href;
+                    }
+                  : onPendingPhaseClick
+            }
           >
             {item.title}
           </button>
